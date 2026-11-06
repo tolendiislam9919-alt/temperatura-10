@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Температура — 10-сынып</title>
+<style>
+:root{
+  --paper:#f3efe4; --card:#fbf9f3; --ink:#1d2430; --muted:#6a6658; --line:#d8d0bd;
+  --blue:#2d5f4f; --blue-d:#21483c; --yellow:#e0a92e; --red:#b8442f; --green:#2e7d4f; --brass:#c79a3a;
+  --frame:#6b4a2b; --board:#1d2a26;
+  --g0:#c8352b; --g1:#2e7d4f; --g2:#1f5fa8;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:#2a2d31}
+body{color:var(--ink);font-family:"Segoe UI","Noto Sans",system-ui,sans-serif}
+.stage{position:absolute;left:0;top:0;width:1600px;height:900px;transform-origin:0 0;background:var(--paper);overflow:hidden;
+  background-image:linear-gradient(rgba(45,95,79,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(45,95,79,.05) 1px,transparent 1px);background-size:24px 24px}
+.top{position:absolute;left:0;right:0;top:0;height:54px;display:flex;align-items:center;gap:14px;padding:0 16px 0 22px;background:var(--blue);color:#fff}
+.top .sign{min-width:34px;height:30px;border-radius:4px;background:var(--brass);display:grid;place-items:center;font:800 13px Georgia,serif;color:#2a1f0c;padding:0 6px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.2)}
+.top .lesson{font-size:13px;letter-spacing:2px;text-transform:uppercase;opacity:.85}
+.top .stitle{font-family:Georgia,"Times New Roman",serif;font-size:20px;font-weight:600;white-space:nowrap}
+.top .sep{width:1px;height:22px;background:rgba(255,255,255,.35)}
+.gchips{margin-left:auto;display:flex;gap:6px}
+.gchip{display:flex;align-items:center;gap:7px;border:none;border-radius:18px;padding:3px 4px 3px 12px;color:#fff;font:600 14px "Segoe UI";cursor:pointer;user-select:none}
+.gchip b{font:800 19px Georgia,serif;min-width:26px;text-align:center}
+.gchip .mn{width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.25);display:grid;place-items:center;font-size:15px}
+.mainw{position:absolute;left:0;right:0;top:54px;bottom:58px;display:flex}
+.leftw{position:relative;width:1040px;flex:none;transition:width .35s ease}
+.stage.wide .leftw,.stage.noboard .leftw{width:100%}
+.stage.wide .rightw,.stage.noboard .rightw{display:none}
+.slide{position:absolute;inset:0;display:none;overflow:hidden}
+.slide.on{display:block;animation:fadein .3s ease}
+.slide.nofit{padding:18px 26px 14px 30px;flex-direction:column;gap:12px}
+.slide.nofit.on{display:flex}
+.sc{position:absolute;top:13px;left:24px;width:900px;display:flex;flex-direction:column;gap:12px;transform-origin:0 0}
+.duo{display:flex;flex-direction:column;gap:12px}
+.duo>div{display:flex;flex-direction:column;gap:12px;min-width:0}
+.stage.noboard .duo{flex-direction:row;align-items:flex-start;gap:18px}
+.stage.noboard .duo>.pa{flex:1.12} .stage.noboard .duo>.pb{flex:1}
+.leftw.notrans{transition:none}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+h2.st{font-family:Georgia,"Times New Roman",serif;font-weight:700;font-size:32px;margin:0;color:var(--ink)}
+h2.st small{display:block;font:600 13px "Segoe UI",sans-serif;letter-spacing:2.2px;color:var(--blue);text-transform:uppercase;margin-bottom:3px}
+p.lead{font-size:19px;line-height:1.5;margin:0;color:#2c3340}
+.fbox{background:#fff;border:1px solid var(--line);border-left:6px solid var(--yellow);border-radius:4px;padding:10px 16px;font-family:"Cambria Math","Times New Roman",serif;font-size:20px;line-height:1.6}
+.fbox .big{font-size:28px;font-style:italic;font-weight:600}
+canvas.lab{display:block;max-width:100%;margin:0 auto;border:1px solid var(--line);border-radius:4px;background:#e9e3d3}
+.row{display:flex;gap:14px;align-items:stretch}
+.col{display:flex;flex-direction:column;gap:10px}
+.grow{flex:1;min-width:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:5px;padding:11px 14px}
+.card h3{margin:0 0 8px;font:700 15px "Segoe UI",sans-serif;text-transform:uppercase;letter-spacing:.6px;color:var(--blue)}
+.ctl .lab{display:flex;justify-content:space-between;align-items:baseline;font-size:15px;color:var(--muted);margin-bottom:4px}
+.ctl .val{font:700 18px Georgia,serif;color:var(--ink)}
+input[type=range]{width:100%;accent-color:var(--blue);height:22px;margin:0}
+.btn{font:inherit;font-size:15px;padding:7px 14px;cursor:pointer;border-radius:4px;border:1px solid #c9c0aa;background:#fff;color:var(--ink)}
+.btn:hover{border-color:var(--blue)}
+.btn.main{background:var(--blue);border-color:var(--blue-d);color:#fff;font-weight:600}
+.btn.main:hover{background:var(--blue-d)}
+.btn.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn:disabled{opacity:.4;cursor:default}
+.warn{border:1px dashed var(--red);background:#fff4f2;border-radius:4px;padding:8px 13px;font-size:16px;line-height:1.45}
+.warn b{color:var(--red)}
+.tip{border:1px dashed var(--blue);background:#eef5f1;border-radius:4px;padding:8px 13px;font-size:16px;line-height:1.45}
+ul.pl{margin:0;padding-left:22px;font-size:19px;line-height:1.6}
+table.t{border-collapse:collapse;width:100%;font-size:16px;background:#fff}
+table.t th,table.t td{border:1px solid var(--line);padding:5px 9px;text-align:center}
+table.t th{background:#e4ece7;font-size:13px;text-transform:uppercase;letter-spacing:.4px;color:#2c3340}
+table.t td.l{text-align:left}
+table.t input{font:inherit;font-size:16px;width:84px;padding:3px 6px;border:1px solid #c9c0aa;border-radius:3px;text-align:center}
+sup,sub{font-size:.72em;line-height:0}
+.good{color:var(--green);font-weight:700} .bad{color:var(--red);font-weight:700}
+.chk{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:17px}
+.chk input{font:inherit;font-size:17px;width:90px;padding:5px 8px;border:1px solid #c9c0aa;border-radius:4px}
+
+/* таразы зертханасы */
+.wset{display:flex;flex-wrap:wrap;gap:6px}
+.wb{font:600 15px Georgia,serif;padding:7px 10px;min-width:60px;border-radius:5px;border:1px solid #a98538;background:linear-gradient(#f3dc9a,#d4ab4f);color:#3a2a08;cursor:pointer}
+.wb.mg{background:linear-gradient(#f2f2f2,#c9ccd0);border-color:#8d939a}
+.wb:disabled{opacity:.25;cursor:default}
+.objs{display:flex;flex-wrap:wrap;gap:6px}
+.status{font-size:17px;line-height:1.45;min-height:50px}
+.status b{color:var(--blue)}
+
+/* таймер */
+.timer{font:700 104px/1 Consolas,monospace;color:var(--ink);text-align:center;letter-spacing:2px}
+.timer.low{color:var(--red)}
+.rot td.cur{background:#fff3cf;font-weight:700}
+.stn{display:inline-block;padding:1px 8px;border-radius:10px;color:#fff;font-size:13px}
+
+/* топқа бөлу */
+.gdiv{display:grid;grid-template-columns:420px 1fr;gap:22px;align-items:start}
+.gcard{width:420px;height:420px;border-radius:22px;display:grid;place-items:center;text-align:center;cursor:pointer;user-select:none;touch-action:manipulation;
+  background:repeating-linear-gradient(45deg,#2d5f4f 0 22px,#346b5a 22px 44px);color:#fff;box-shadow:0 10px 24px rgba(0,0,0,.2),inset 0 0 0 8px rgba(255,255,255,.15);transition:transform .15s}
+.gcard:active{transform:scale(.98)}
+.gcard .q{font:800 120px/1 Georgia,serif}
+.gcard .tx{font:700 26px "Segoe UI";margin-top:8px}
+.gcard.res .q{font-size:46px} .gcard.res .tx{font-size:22px;opacity:.9}
+.gcols{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.gcol{background:#fff;border:1px solid var(--line);border-radius:6px;overflow:hidden;min-height:330px}
+.gcol h4{margin:0;padding:8px 10px;color:#fff;font:700 18px "Segoe UI";display:flex;justify-content:space-between}
+.gcol ol{margin:6px 0;padding-left:30px;font-size:16px;line-height:1.55}
+
+/* миға шабуыл */
+.bgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.bq{min-height:150px;border-radius:10px;background:#fff;border:2px solid var(--line);padding:12px 14px;cursor:pointer;user-select:none;display:flex;flex-direction:column;justify-content:center;transition:.2s}
+.bq .n{font:800 54px Georgia,serif;color:var(--blue);text-align:center}
+.bq .qq{display:none;font-size:18.5px;line-height:1.4;font-weight:600}
+.bq .aa{display:none;font-size:16.5px;line-height:1.35;color:var(--green);margin-top:8px;border-top:1px dashed var(--line);padding-top:6px}
+.bq.open{border-color:var(--brass);background:#fffaf0} .bq.open .n{display:none} .bq.open .qq{display:block}
+.bq.ans .aa{display:block}
+
+/* топтық тапсырма */
+.gtask{border-radius:8px;background:#fff;border:1px solid var(--line);border-top:8px solid;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.gtask h4{margin:0;font:700 19px "Segoe UI"}
+.gtask .tx{font-size:17px;line-height:1.45;flex:1}
+.gtask .ai{display:flex;gap:6px;align-items:center;font-size:16px;flex-wrap:wrap}
+.gtask input{font:inherit;font-size:17px;width:90px;padding:4px 7px;border:1px solid #c9c0aa;border-radius:4px}
+.gtask .r{font-size:15px;min-height:22px}
+
+/* тапсырмалар */
+.who{display:flex;align-items:center;gap:8px;font-size:17px;flex-wrap:wrap}
+.who select{font:inherit;font-size:17px;padding:5px 8px;border:1px solid #c9c0aa;border-radius:4px;min-width:260px}
+.tq{background:#fff;border:1px solid var(--line);border-radius:5px;padding:8px 12px;display:grid;grid-template-columns:46px 1fr;gap:4px 10px;align-items:start}
+.tq .lv{grid-row:span 2;font:800 22px Georgia,serif;color:#fff;border-radius:5px;text-align:center;padding:6px 0}
+.tq .qt{font-size:17px;line-height:1.4}
+.tq .ans{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+.ai input{font:inherit;font-size:17px;width:110px;padding:4px 7px;border:1px solid #c9c0aa;border-radius:4px}
+.ai input.okk{border-color:var(--green);background:#e8f4ec} .ai input.nok{border-color:var(--red);background:#fdecea}
+.ai{display:flex;gap:6px;align-items:center;font-size:16.5px}
+.ai .r{font-size:14px;min-width:20px}
+.lvA{background:#4f8a6e} .lvB{background:#c79a3a} .lvC{background:#b8442f}
+.score{margin-left:auto;font:700 22px Georgia,serif}
+
+/* бағалау */
+.gwrap{display:grid;grid-template-columns:1fr 330px;gap:16px;flex:1;min-height:0}
+.gtab{overflow:auto;border:1px solid var(--line);border-radius:4px;background:#fff}
+.gtab table.t{font-size:15px} .gtab th{position:sticky;top:0}
+textarea.roster{width:100%;flex:1;font:15px/1.5 "Segoe UI",sans-serif;padding:8px;border:1px solid #c9c0aa;border-radius:4px;resize:none}
+.sum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.sum div{background:#fff;border:1px solid var(--line);border-radius:5px;padding:8px;text-align:center}
+.sum b{display:block;font:700 28px Georgia,serif}
+
+/* дуэль */
+.duel{position:absolute;inset:0;display:grid;grid-template-columns:1fr 170px 1fr;touch-action:none;user-select:none;-webkit-user-select:none}
+.side{padding:18px 22px;display:flex;flex-direction:column;gap:14px}
+.side.A{background:linear-gradient(180deg,#f6dcd8,#efc6c0)} .side.B{background:linear-gradient(180deg,#d9e6f6,#c4d7f0)}
+.side .whoq{display:flex;align-items:center;gap:12px}
+.side .whoq input{font:700 24px Georgia,serif;border:none;border-bottom:2px dashed rgba(0,0,0,.25);background:transparent;width:280px;padding:2px 4px}
+.side .sc2{margin-left:auto;font:800 58px Georgia,serif;line-height:1}
+.side.A .sc2{color:#b8442f} .side.B .sc2{color:#1f5fa8}
+.side .qq2{background:#fff;border-radius:10px;padding:16px 18px;font:700 40px/1.3 "Segoe UI",sans-serif;min-height:170px;text-align:center;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,.08)}
+.side .opts{display:grid;grid-template-columns:1fr 1fr;gap:14px;flex:1;align-content:start}
+.side .o{font:700 34px Georgia,serif;padding:20px 10px;border-radius:12px;border:3px solid rgba(0,0,0,.12);background:#fff;cursor:pointer;touch-action:none;min-height:110px;-webkit-tap-highlight-color:transparent}
+.side .o.good{background:#2e7d4f;color:#fff;border-color:#1f5a38}
+.side .o.badc{background:#c8352b;color:#fff;border-color:#8e241d}
+.side .o.dim{opacity:.4}
+.side .stat{font:600 19px "Segoe UI";min-height:28px;display:flex;justify-content:space-between}
+.pbar{height:10px;background:rgba(255,255,255,.6);border-radius:5px;overflow:hidden}
+.pbar i{display:block;height:100%;width:0;transition:width .3s}
+.side.A .pbar i{background:#b8442f} .side.B .pbar i{background:#1f5fa8}
+.mid{background:var(--ink);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:10px;text-align:center}
+.mid .lbl{font-size:13px;letter-spacing:1.5px;text-transform:uppercase;opacity:.7}
+.mid .clock{font:700 30px Consolas,monospace;color:var(--yellow)}
+.mid .btn{width:140px}
+.overlay{position:absolute;inset:0;background:rgba(29,36,48,.82);display:flex;align-items:center;justify-content:center;z-index:5}
+.overlay .box{background:#fff;border-radius:12px;padding:28px 36px;text-align:center;max-width:760px}
+.overlay h3{font:700 38px Georgia,serif;margin:0 0 10px}
+.overlay p{font-size:20px;color:#444;line-height:1.5}
+
+/* ФС 3D */
+#fs3d{display:block;width:470px;height:560px;border-radius:6px;border:1px solid var(--line);cursor:grab;touch-action:none;background:#dfe6ea}
+.fsq{display:grid;grid-template-columns:auto 1fr;gap:8px 10px;align-items:center;font-size:17px}
+.fsq input{font:inherit;font-size:17px;width:100px;padding:4px 7px;border:1px solid #c9c0aa;border-radius:4px}
+
+/* бағдаршам */
+.lights{display:flex;gap:26px;justify-content:center;align-items:flex-end}
+.lt{display:flex;flex-direction:column;align-items:center;gap:8px}
+.lt .c{width:150px;height:150px;border-radius:50%;display:grid;place-items:center;font:800 54px Georgia,serif;color:#fff;cursor:pointer;box-shadow:inset 0 -10px 0 rgba(0,0,0,.15),0 6px 14px rgba(0,0,0,.15);user-select:none}
+.lt .tx{font-size:17px;text-align:center;max-width:190px;line-height:1.3}
+.lt .mn{font-size:13px;padding:2px 10px}
+.bar{display:flex;height:22px;border-radius:4px;overflow:hidden;border:1px solid var(--line);background:#fff}
+.bar i{display:block;height:100%;transition:width .3s}
+
+/* тақта */
+.rightw{flex:1;padding:14px 18px 14px 22px;display:flex;position:relative;transition:transform .3s}
+.rightw.drag{transition:none}
+.grip{position:absolute;left:0;top:50%;transform:translateY(-50%);width:26px;height:190px;border-radius:10px;background:#8a6a48;cursor:ew-resize;touch-action:none;
+  display:flex;align-items:center;justify-content:center;color:#f1e6d4;font-size:14px;font-weight:600;writing-mode:vertical-rl;letter-spacing:2px;box-shadow:0 3px 8px rgba(0,0,0,.25);z-index:3;user-select:none}
+.btab{position:absolute;right:0;top:50%;transform:translateY(-50%);width:34px;height:170px;border-radius:12px 0 0 12px;background:var(--frame);color:#f1e6d4;
+  display:none;align-items:center;justify-content:center;writing-mode:vertical-rl;font:600 15px "Segoe UI";letter-spacing:2px;cursor:pointer;z-index:6;touch-action:none;box-shadow:-3px 3px 10px rgba(0,0,0,.25)}
+.stage.noboard:not(.wide) .btab{display:flex}
+.board{flex:1;position:relative;border:10px solid var(--frame);border-radius:6px;display:flex;flex-direction:column;overflow:hidden;
+  box-shadow:inset 0 0 40px rgba(0,0,0,.55),0 10px 24px rgba(0,0,0,.25);
+  background:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px) 0 0/100% 46px,radial-gradient(ellipse at 30% 20%,#25352f 0%,var(--board) 70%)}
+.board::after{content:"";position:absolute;left:0;right:0;bottom:0;height:12px;background:linear-gradient(#5a3e24,#3f2a17);pointer-events:none}
+.tools{display:flex;align-items:center;gap:6px;padding:7px 9px;background:rgba(0,0,0,.25);border-bottom:1px solid rgba(255,255,255,.06);z-index:2;flex-wrap:wrap}
+.sw{width:25px;height:25px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0;flex:none}
+.sw.on{border-color:#fff;box-shadow:0 0 0 2px rgba(0,0,0,.6)}
+.tb{white-space:nowrap;font:inherit;font-size:13px;background:rgba(255,255,255,.06);color:#dfe7e2;border:1px solid rgba(255,255,255,.12);border-radius:3px;padding:4px 8px;cursor:pointer;flex:none}
+.tb:hover{background:rgba(255,255,255,.14)} .tb.on{background:#e8e3cf;color:#1d2a26}
+.gapx{flex:1}
+.bhint{position:absolute;left:16px;bottom:22px;right:16px;font-family:Georgia,serif;font-style:italic;font-size:15px;color:rgba(230,240,232,.28);pointer-events:none;z-index:1}
+#ink{display:block;flex:1;min-height:0;width:100%;margin-bottom:12px;touch-action:none;cursor:crosshair;position:relative;z-index:1}
+
+.bottom{position:absolute;left:0;right:0;bottom:0;height:58px;display:flex;align-items:center;gap:8px;padding:0 20px;background:var(--ink)}
+.bottom .btn{background:transparent;color:#e8e8e8;border-color:#4b5262}
+.bottom .btn.main{background:var(--yellow);color:#1d2430;border-color:var(--yellow)}
+.dots{display:flex;gap:3px;margin:0 6px}
+.dot{width:30px;height:30px;border-radius:4px;border:1px solid #4b5262;background:transparent;color:#aab;font-size:12.5px;cursor:pointer;padding:0}
+.dot.on{background:var(--yellow);color:#1d2430;border-color:var(--yellow);font-weight:700}
+.dot.gm{border-color:var(--red)}
+.cnt{margin-left:auto;color:#cfd3dc;font:15px Georgia,serif}
+.toast{position:absolute;left:50%;top:66px;transform:translate(-50%,-10px);background:var(--ink);color:#fff;padding:10px 18px;border-radius:5px;opacity:0;transition:.25s;pointer-events:none;z-index:20;font-size:18px}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+.aop{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.aop button{font:inherit;font-size:17px;line-height:1.3;text-align:left;padding:10px 12px;border-radius:5px;border:2px solid var(--line);background:#fff;cursor:pointer;color:var(--ink)}
+.aop button b{display:inline-block;min-width:26px;font-family:Georgia,serif;color:var(--blue)}
+.aop button:disabled{opacity:.45;cursor:default}
+.aop button.ok,.aop button.no{opacity:1!important} .aop button.ok{border-color:var(--green);background:#e6f3ea} .aop button.no{border-color:var(--red);background:#f8e8e4}
+.stage.noboard .duo.astro>.pa{flex:1.6} .stage.noboard .duo.astro .sit{display:none} .stage.noboard .duo.astro .aop{grid-template-columns:1fr}
+#asMsg{font-size:18px;line-height:1.45;min-height:54px}
+
+.ptabs{display:flex;gap:8px;align-items:stretch}
+.ptab{flex:1;font:700 19px "Segoe UI";padding:8px 12px;border-radius:6px;border:3px solid;background:#fff;cursor:pointer;text-align:left;line-height:1.2}
+.ptab small{display:block;font-size:14px;font-weight:500;opacity:.9}
+.ptab.on{color:#fff!important}
+.pttmw{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--line);border-radius:6px;padding:4px 8px}
+.pttm{font:700 40px/1 Consolas,monospace;min-width:118px;text-align:center}
+.pttm.low{color:var(--red)}
+#ptTab td.ok{background:#e6f3ea} #ptTab td.no{background:#f8e8e4}
+#ptTab input{width:96px}
+#ptCtl{display:flex;flex-direction:column;gap:8px}
+.wb,canvas.lab{touch-action:none}
+.duo.ptd{flex-direction:row;align-items:flex-start;gap:18px} .duo.ptd>.pa{flex:1.15} .duo.ptd>.pb{flex:1}
+
+.c3d{display:block;width:640px;height:430px;border-radius:6px;border:1px solid var(--line);cursor:grab;touch-action:none;background:#1d2a26}
+.hud{display:grid;grid-template-columns:auto auto auto auto;gap:4px 14px;font-size:17px;align-items:center;background:#1e2a22;color:#e9f3ec;border-radius:6px;padding:8px 12px;font-family:"Segoe UI"}
+.hud b{font:700 20px Consolas,monospace;color:#8ff0a4} .hud .q{color:#f6d77a}
+.hud .h{font-size:12px;letter-spacing:1px;text-transform:uppercase;opacity:.7}
+.rule{border-left:6px solid var(--brass);background:#fff8e6;border-radius:4px;padding:8px 12px;font-size:17px;line-height:1.45}
+.rule .f{font:700 24px Georgia,serif;color:var(--blue)}
+
+/* §13 термодинамика */
+.stp{font-size:18px;line-height:1.5;padding:5px 0;border-bottom:1px dashed var(--line);opacity:.16;transition:opacity .45s}
+.stp.on{opacity:1}
+.stp b{font:italic 700 21px "Cambria Math","Times New Roman",serif;color:var(--blue)}
+.stp .nt{font-size:14px;color:var(--muted)}
+.stp.fin{border:0;font-size:19px}
+.stp.fin b{font-size:32px;color:var(--red)}
+.qk{background:#fff;border:1px solid var(--line);border-left:5px solid var(--blue);border-radius:5px;padding:8px 12px;font-size:17px;line-height:1.42}
+.qk.good{border-left-color:var(--green)} .qk.fail{border-left-color:var(--red)}
+.qk .qn{font:700 12px "Segoe UI",sans-serif;letter-spacing:1px;text-transform:uppercase;color:var(--blue);margin-bottom:2px}
+.qk .qa{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;margin-top:6px}
+.qk .qa input{font:inherit;font-size:17px;width:120px;padding:4px 7px;border:1px solid #c9c0aa;border-radius:4px}
+.qk .ch{font:inherit;font-size:15.5px;line-height:1.3;text-align:left;padding:6px 10px;border-radius:5px;border:2px solid var(--line);background:#fff;cursor:pointer;color:var(--ink)}
+.qk .ch:disabled{opacity:.5;cursor:default} .qk .ch.ok{border-color:var(--green);background:#e6f3ea;opacity:1} .qk .ch.no{border-color:var(--red);background:#f8e8e4}
+.qk .qr{font-size:15.5px;margin-top:4px}
+.qk .sol{display:block;color:#2c3340;background:#f2f6f3;border-radius:4px;padding:4px 8px;margin-top:4px}
+#f1Q,#f2Q{gap:8px}
+.egrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.exm{background:#fff;border:1px solid var(--line);border-top:5px solid var(--brass);border-radius:6px;padding:10px 14px;cursor:pointer;user-select:none}
+.exm .et{font-size:18px;line-height:1.45}
+.exm .en{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--blue);color:#fff;font:700 16px Georgia,serif;margin-right:8px}
+.exm .sl{display:none;border-top:1px dashed var(--line);margin-top:8px;padding-top:8px;font:19px/1.6 "Cambria Math","Times New Roman",serif;color:#22313a}
+.exm .sl b{color:var(--red)}
+.exm.open .sl{display:block} .exm.open{border-top-color:var(--green)}
+.exm .eh{font-size:13px;color:var(--blue);margin-top:6px;letter-spacing:.5px}
+/* жақындату */
+.zov{position:absolute;inset:0;z-index:30;background:rgba(20,24,30,.8);display:none;align-items:center;justify-content:center}
+.zov.on{display:flex}
+.zwrap{transform-origin:center center;background:var(--paper);border-radius:10px;padding:14px;box-shadow:0 20px 50px rgba(0,0,0,.5)}
+.zwrap>*{margin:0!important}
+.zx{position:absolute;top:18px;right:22px;width:64px;height:64px;border-radius:50%;font:700 30px "Segoe UI",sans-serif;background:#fff;color:var(--ink);border:none;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.zhint{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);color:#dfe3e8;font-size:16px}
+.stage.zpick .slide.on{cursor:zoom-in}
+.stage.zpick .slide.on :is(.qk,.tq,.exm,.bq,.aop,.rule,.fbox,canvas.lab,.card,.tip,.warn):hover{outline:4px solid var(--yellow);outline-offset:2px}
+.bottom #zm{font-weight:700}
+.bottom #zm.on{background:var(--yellow);color:#1d2430;border-color:var(--yellow)}
+
+
+/* изопроцестер */
+.qgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.qgrid .qk{font-size:16.5px}
+.chain{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-left:6px solid var(--brass);border-radius:4px;padding:8px 12px;min-height:52px}
+.chain .ar{color:#a7a18f;font-size:22px}
+.lk{opacity:.1;transition:opacity .45s}
+.lk.on{opacity:1}
+.chain .lk{font:italic 700 24px "Cambria Math","Times New Roman",serif;color:var(--blue)}
+.chain .lk:last-child{color:var(--red);font-size:28px}
+table.sgn td{font-size:17px;padding:9px}
+table.sgn td.sg{font:800 30px Georgia,serif;width:70px;color:var(--blue)}
+.def2{border-left:6px solid var(--blue);background:#e4ece7;border-radius:4px;padding:10px 14px;font:600 19px/1.45 Georgia,serif}
+.izg{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.izc{background:#fff;border:1px solid var(--line);border-top:7px solid;border-radius:6px;padding:10px 12px}
+.izc .ik{font:italic 700 25px "Cambria Math","Times New Roman",serif}
+.izc h4{margin:5px 0 1px;font:700 18px "Segoe UI",sans-serif}
+.izc .iw{font-size:13.5px;color:var(--muted)}
+.izc p{margin:7px 0 0;font-size:15.5px;line-height:1.4}
+table.cmp td{font-size:16px;padding:9px 7px;height:58px}
+table.cmp td.rv{cursor:pointer;user-select:none;position:relative;background:#f0ead9;color:transparent}
+table.cmp td.rv::after{content:"?";position:absolute;inset:0;display:grid;place-items:center;color:var(--blue);font:700 24px Georgia,serif}
+table.cmp td.rv b{color:transparent}
+table.cmp td.rv.op{background:#fff;color:var(--ink);cursor:default}
+table.cmp td.rv.op b{color:var(--red)}
+table.cmp td.rv.op::after{content:none}
+.sit{font-size:16.5px;line-height:1.45}
+.dchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
+.dchips span{background:#efe9da;border:1px solid var(--line);border-radius:4px;padding:2px 9px;font:600 14.5px "Segoe UI",sans-serif}
+.lvp{display:flex;flex-direction:column;gap:10px}
+.sum{grid-template-columns:repeat(4,1fr)}
+.sum div{font-size:13px;padding:6px 2px}
+.side .o{font-size:27px;padding:14px 6px}
+.side .qq2{font-size:36px}
+.phchip{margin-left:auto;font:700 15px "Segoe UI";color:#1d2430;background:var(--yellow);border:none;border-radius:16px;padding:6px 14px;cursor:pointer;white-space:nowrap;max-width:520px;overflow:hidden;text-overflow:ellipsis}
+.jn{position:absolute;inset:0;display:grid;grid-template-columns:600px 1fr;gap:26px;padding:20px 30px}
+.jn h2{font:700 36px Georgia,serif;margin:0 0 6px}
+.jn .qrb{width:540px;height:540px;background:#fff;border-radius:14px;padding:12px;border:1px solid var(--line)}
+.jn .qrb svg{width:100%;height:100%;display:block}
+.qrno{height:100%;display:grid;place-items:center;text-align:center;color:var(--red);font:700 26px "Segoe UI"}
+.jnurl{font:700 19px Consolas,monospace;color:var(--blue);word-break:break-all;margin-top:8px}
+.nmg{display:flex;flex-wrap:wrap;gap:9px;align-content:flex-start;background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px;flex:1;min-height:0;overflow:auto}
+.nmc{color:#fff;font:700 21px "Segoe UI";padding:7px 15px;border-radius:20px;cursor:pointer;animation:fadein .3s}
+.phov{position:absolute;inset:0;z-index:30;background:rgba(29,36,48,.82);align-items:center;justify-content:center}
+.phbox{background:var(--card);border-radius:12px;width:1420px;height:790px;padding:18px 22px;display:grid;grid-template-columns:300px 1fr;gap:18px}
+.phbox .qrb{width:280px;height:280px;background:#fff;padding:6px;border:1px solid var(--line);border-radius:8px}
+.phbox .qrb svg{width:100%;height:100%;display:block}
+.phtb{overflow:auto;border:1px solid var(--line);border-radius:6px;background:#fff}
+.rcw{position:absolute;inset:0;display:flex;flex-direction:column;gap:10px;padding:12px 28px}
+.rctt{display:flex;gap:24px;align-items:center;justify-content:space-between}
+.rctt small{font:600 13px "Segoe UI";letter-spacing:2.2px;text-transform:uppercase;color:var(--blue)}
+.rctt h2{font:700 46px/1.1 Georgia,serif;margin:2px 0 6px}.rctt p{font-size:20px;line-height:1.4;margin:0;max-width:1120px}
+.rcqr{width:230px;height:230px;flex:none;background:#fff;padding:6px;border-radius:10px;border:1px solid var(--line)}.rcqr svg{width:100%;height:100%;display:block}
+#rcTop{flex:none;min-height:96px}
+.rcq{display:flex;align-items:center;gap:16px;min-height:90px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 16px}
+.rcn{font:800 24px Georgia,serif;color:var(--blue);flex:none}
+.rcqt{flex:1;font:700 34px/1.2 "Segoe UI",sans-serif;text-align:center}
+.rcsec{flex:none;width:76px;height:76px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font:800 34px Georgia,serif}
+.rctm{height:10px;background:#e4dcc9;border-radius:5px;overflow:hidden;margin-top:6px}.rctm i{display:block;height:100%;width:100%;background:var(--red);transition:width .2s linear}
+.rccd{font:800 76px/1 Georgia,serif;color:var(--red)}
+.rcwin{font:800 44px Georgia,serif;color:var(--ink)}
+canvas#cRace{width:100%;height:auto;border:none;border-radius:8px;background:#7fb069;flex:none}
+.rcopts{display:grid;grid-template-columns:1fr 1fr;gap:9px;flex:1;min-height:0}
+.rco{display:flex;align-items:center;gap:14px;color:#fff;border-radius:10px;padding:6px 18px;font:700 25px/1.15 "Segoe UI",sans-serif;min-height:64px}
+.rco b{font-size:30px;flex:none}.rco span{flex:1}.rco em{font:800 30px Georgia,serif;font-style:normal;flex:none}
+.rco.o0{background:#d63a35}.rco.o1{background:#1f6fc4}.rco.o2{background:#d09a12}.rco.o3{background:#2a8f4d}
+.rco.dim{opacity:.28}.rco.right{outline:5px solid #1d2430;outline-offset:-5px}
+.rcctl{display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex:none}
+.rcfan{font-size:19px}.rcurl{margin-left:auto;font:700 16px Consolas,monospace;color:var(--blue)}
+.rcslots{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.rcsl{display:flex;align-items:center;justify-content:space-between;color:#fff;font:700 26px "Segoe UI";padding:12px 16px;border-radius:10px;min-height:66px}
+.rcsl.em{background:#fff;border:3px dashed;font-size:20px;justify-content:center}
+.rcsl button{background:rgba(0,0,0,.25);color:#fff;border:none;border-radius:50%;width:32px;height:32px;font-size:18px;cursor:pointer}
+.rcboard{margin-left:auto;display:flex;gap:8px}.rcb{background:#fff;border:1px solid var(--line);border-left:6px solid;border-radius:6px;padding:4px 12px;font-size:17px;display:flex;gap:10px;align-items:center}.rcb b{font:800 21px Georgia,serif}
+.rcend{display:grid;grid-template-columns:1fr 420px;gap:16px;flex:1;min-height:0}
+.rcpod{display:flex;align-items:flex-end;justify-content:center;gap:14px}
+.pd{width:270px;color:#fff;border-radius:10px 10px 0 0;text-align:center;padding:10px;font:700 24px "Segoe UI";display:flex;flex-direction:column;justify-content:center;gap:2px}
+.pd b{font:800 36px Georgia,serif}.pd small{font-size:15px;font-weight:500}.pd .pn{font-size:16px;opacity:.9}.pd.p0{min-height:230px}.pd.p1{min-height:180px}.pd.p2{min-height:145px}
+.rcfl{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-size:18px;line-height:1.5}.rcfl h4{margin:0 0 4px;font:700 15px "Segoe UI";text-transform:uppercase;letter-spacing:.6px;color:var(--blue)}
+
+/* §18 */
+:root{--blue:#20506e;--blue-d:#173c54}
+.top{background:var(--blue)}
+.phchip{margin-left:auto}
+.fstop{margin-left:10px;font:700 15px "Segoe UI";background:#fff;color:var(--ink);border:none;border-radius:6px;padding:7px 16px;cursor:pointer;white-space:nowrap}
+.fstop:hover{background:#ffe9b5}
+.srt{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
+.sri{background:#fff;border:1px solid var(--line);border-left:6px solid var(--line);border-radius:6px;padding:9px 11px;font-size:17px;display:flex;flex-direction:column;gap:7px;justify-content:space-between;min-height:104px}
+.sri div{display:flex;gap:6px}.sri .btn{flex:1}
+.sri.ok{border-left-color:var(--green);background:#eef7f0}.sri.no{border-left-color:var(--red);background:#fbeeeb}
+.ctlg{display:flex;gap:14px;align-items:flex-end}.ctlg .ctl{flex:1;min-width:0}
+.ff{font:italic 700 18px "Cambria Math","Times New Roman",serif;color:var(--red);margin-top:4px}
+.ex18{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.exr{display:flex;align-items:center;gap:7px;font-size:17px;margin-bottom:6px}
+.exr .x{min-width:76px;font-weight:600}
+.exr input{font:inherit;width:80px;padding:3px 6px;border:1px solid #c9c0aa;border-radius:4px}
+.exr input.okk{border-color:var(--green);background:#e8f4ec}.exr input.nok{border-color:var(--red);background:#fdecea}
+.exr .btn{padding:2px 9px;font-size:14px}.exr .r{font-size:14.5px}
+.rcw{gap:7px;padding:8px 22px}
+#rcTop{min-height:0}
+canvas#cRace{width:100%;height:auto}
+.rclob{display:grid;grid-template-columns:440px 1fr;gap:22px;align-items:start}
+.rclob .rcqr{width:440px;height:440px}
+.rclt small{font:600 13px "Segoe UI";letter-spacing:2.2px;text-transform:uppercase;color:var(--blue)}
+.rclt h2{font:700 44px/1.1 Georgia,serif;margin:2px 0 6px}
+.rclt p{font-size:21px;line-height:1.4;margin:0 0 8px}
+.rcwifi{background:#fff4d9;border:1px solid #e6cf8f;border-radius:8px;padding:6px 12px;font-size:20px;margin-bottom:8px}
+.rcur{display:flex;gap:14px;align-items:baseline;font:700 18px Consolas,monospace;color:var(--blue);margin-bottom:6px;flex-wrap:wrap}
+.rccn{font-size:23px;margin-bottom:6px}.rccn b{font:800 36px Georgia,serif}
+.nmg{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+.nmc{font-size:18px;padding:5px 12px}
+.big2{font-size:26px!important;padding:11px 24px!important}
+.rcq{min-height:76px;padding:5px 14px}
+.rcqt{font-size:30px}
+.rcqt small{display:block;font:600 18px "Segoe UI";color:var(--green);margin-top:2px}
+.rcsec{width:62px;height:62px;font-size:28px}
+.rcac{flex:none;display:flex;flex-direction:column;align-items:center;font-size:12.5px;gap:1px}.rcac b{font:800 22px Georgia,serif}.rcac .btn{padding:2px 7px;font-size:12.5px}
+.rcnx{flex:none;font-size:25px!important;padding:12px 20px!important}
+.rcopts{grid-template-columns:repeat(4,1fr);gap:7px}
+.rco{min-height:52px;font-size:20px;padding:4px 12px;gap:8px}.rco b{font-size:23px}.rco em{font-size:25px}
+.rcwin{font-size:38px}
+.rcend{grid-template-columns:1fr 830px;height:490px}
+.pd{width:210px;font-size:20px}.pd b{font-size:30px}
+.rcall{columns:2;font-size:17px;line-height:1.55}
+.rcall div{display:flex;align-items:center;gap:6px;break-inside:avoid}.rcall i{width:12px;height:12px;border-radius:50%;flex:none}.rcall b{margin-left:auto;padding-right:14px;font-family:Georgia,serif}
+.phov .phbox{display:flex;flex-direction:column;align-items:center;width:880px;height:auto;gap:12px;position:relative}
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <div class="top"><span class="sign">t°</span><span class="lesson">Физика · 10-сынып · §18</span><span class="sep"></span><span class="stitle" id="stitle"></span><button class="phchip" id="phChip">📱 QR</button><button class="fstop" id="fs">⛶ Толық экран</button></div>
+  <div class="mainw">
+    <div class="leftw" id="slides">
+
+
+<!-- 1 -->
+<section class="slide" data-title="Кіріспе" data-hint="§18. Термодинамикалық жүйелер мен параметрлер. Тепе-теңдік. Температура">
+  <h2 class="st" style="font-size:37px;line-height:1.12;margin-top:6px"><small>10-сынып · Молекулалық физика · §18</small>Термодинамикалық жүйелер мен параметрлер. Тепе-теңдік. Температура – орташа кинетикалық энергияның өлшемі</h2>
+  <canvas class="lab" id="cTitle" width="840" height="300"></canvas>
+  <div class="row">
+    <div class="card grow"><h3>Күтілетін нәтиже</h3><div style="font-size:17px;line-height:1.45">Молекулалық-кинетикалық теорияның негізгі теңдеулерін есеп шығаруда қолдана аласың.</div></div>
+    <div class="card grow"><h3>Сабақ соңында</h3><div style="font-size:17px;line-height:1.45">Телефонмен кіріп, <b>көлік жарысына</b> қатысасың: 10 сұрақ, әр оқушының өз көлігі бар.</div></div>
+  </div>
+  <div style="font-size:14.5px;color:var(--muted)">«Тайтөбе ауылының жалпы орта білім беретін мектебі» КММ · мұғалім Төленді И.Н.</div>
+</section>
+
+<!-- 2 -->
+<section class="slide" data-title="Жауабы қандай?" data-hint="Ыстық пен суық судың айырмасы неде? Молекулаларға қара">
+  <h2 class="st"><small>Сабақты ашамыз</small>Ыстық су суық судан немен ерекшеленеді?</h2>
+  <canvas class="lab" id="cMol" width="840" height="270"></canvas>
+  <div class="egrid">
+    <div class="exm"><div class="et"><span class="en">1</span>Ыстық судың суық судан айырмашылығы қандай?</div><div class="sl">Молекулалары тезірек қозғалады: орташа кинетикалық энергиясы үлкен.</div></div>
+    <div class="exm"><div class="et"><span class="en">2</span>Ыстық суды суық суға құйсақ, не болады?</div><div class="sl">Ыстық су энергия береді, суық су алады. Температуралары теңеседі.</div></div>
+    <div class="exm"><div class="et"><span class="en">3</span>Суық суды ыстық суға құйсақ ше?</div><div class="sl">Нәтиже сол: массалары бірдей болса, соңғы температура да бірдей.</div></div>
+    <div class="exm"><div class="et"><span class="en">?</span>Сонда <b>температура</b> шын мәнінде нені өлшейді?</div><div class="sl">Бүгінгі сабақтың басты сұрағы. Жауабын зертханадан табамыз.</div></div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section class="slide" data-title="Жүйе және параметрлер" data-hint="Микро: v, m₀, E₀ · Макро: V, p, T">
+  <h2 class="st"><small>І · Термодинамикалық жүйе</small>Жүйе, қоршаған орта, параметрлер</h2>
+  <div class="def2"><b>Термодинамикалық жүйе</b> – өзара және қоршаған ортамен жылулық әрекеттесіп тұратын денелер жиынтығы. Жүйе шекарасынан тыс денелер – <b>қоршаған орта</b>.</div>
+  <canvas class="lab" id="cSys" width="840" height="320"></canvas>
+  <div class="row">
+    <div class="card grow"><h3>Микроскопиялық шамалар</h3><div style="font-size:16.5px;line-height:1.45">«микрос» – кішкене. Бір молекуланы сипаттайды: жылдамдығы, массасы, энергиясы.</div></div>
+    <div class="card grow"><h3>Макроскопиялық шамалар</h3><div style="font-size:16.5px;line-height:1.45">«макрос» – үлкен. Тұтас денені сипаттайды. <b>Термодинамикалық параметрлер: V, p, T.</b></div></div>
+  </div>
+</section>
+
+<!-- 4 -->
+<section class="slide" data-title="Сұрыптау: микро ма, макро ма?" data-hint="1-тапсырма, 3-сұрақ. Бір молекула туралы ма, тұтас дене туралы ма?">
+  <h2 class="st"><small>1-тапсырма · оқулық</small>Шаманы сұрыптайық <span style="font:16px 'Segoe UI';color:var(--muted)">оқушы тақтаға шығып басады</span></h2>
+  <div class="srt" id="srt"></div>
+  <div class="fbox" id="srtR" style="font-size:20px">Әр шамаға бір батырма басыңыз.</div>
+</section>
+
+<!-- 5 -->
+<section class="slide" data-title="Зертхана: жылулық тепе-теңдік" data-hint="t = (m₁t₁ + m₂t₂) / (m₁ + m₂) · Тепе-теңдікте температуралар бірдей">
+  <h2 class="st" style="font-size:28px"><small>ІІ · Виртуалды зертхана</small>Жылулық тепе-теңдік қалай орнайды?</h2>
+  <canvas class="lab" id="cHeq" width="840" height="340"></canvas>
+  <div class="ctlg">
+    <div class="ctl"><div class="lab">t₁, ыстық <span class="val" id="heT1v"></span></div><input type="range" id="heT1" min="50" max="100" step="5" value="80"></div>
+    <div class="ctl"><div class="lab">t₂, суық <span class="val" id="heT2v"></span></div><input type="range" id="heT2" min="0" max="40" step="5" value="20"></div>
+    <div class="ctl"><div class="lab">m₁ <span class="val" id="heM1v"></span></div><input type="range" id="heM1" min="100" max="500" step="50" value="200"></div>
+    <div class="ctl"><div class="lab">m₂ <span class="val" id="heM2v"></span></div><input type="range" id="heM2" min="100" max="500" step="50" value="200"></div>
+    <button class="btn main" id="heGo">🔗 Байланыстыру</button><button class="btn" id="heRe">↺</button>
+  </div>
+  <div class="rule"><b>Термодинамикалық тепе-теңдік</b> – тұйық жүйенің барлық макроскопиялық параметрлері ұзақ уақыт бойы өзгермей тұратын күйі. Температура – сол күйді сипаттайтын шама.</div>
+  <div class="qgrid" id="qHeq"></div>
+</section>
+
+<!-- 6 -->
+<section class="slide" data-title="Зертхана: температура және энергия" data-hint="Ē = (3/2)kT · k = 1,38·10⁻²³ Дж/К · T = t + 273">
+  <h2 class="st" style="font-size:28px"><small>ІІ · Виртуалды зертхана</small>Температура – молекулалардың орташа кинетикалық энергиясының өлшемі</h2>
+  <canvas class="lab" id="cKin" width="840" height="340"></canvas>
+  <div class="ctl"><div class="lab">Температура <span class="val" id="kiTv"></span></div><input type="range" id="kiT" min="0" max="1000" step="10" value="300"></div>
+  <div class="row"><div class="fbox grow" style="text-align:center"><span class="big">Ē = (3/2) kT</span></div><div class="card grow" style="font-size:16px;line-height:1.4">k = 1,38·10⁻²³ Дж/К – Больцман тұрақтысы. Молекулалардың кинетикалық энергиясы көп болған сайын дене температурасы жоғары.</div></div>
+  <div class="qgrid" id="qKin"></div>
+</section>
+
+<!-- 7 -->
+<section class="slide" data-title="Зертхана: термометр түрлері" data-hint="Сұйықтық, механикалық, газдық, электрлік, инфрақызыл">
+  <h2 class="st" style="font-size:28px"><small>ІІІ · Виртуалды зертхана</small>Термометр нені пайдаланып өлшейді?</h2>
+  <div class="row" style="flex-wrap:wrap;gap:6px" id="thTabs"><button class="btn on" data-m="liq">🌡 Сұйықтық</button><button class="btn" data-m="bim">🧭 Механикалық</button><button class="btn" data-m="gas">🎈 Газдық</button><button class="btn" data-m="ele">⚡ Электрлік</button><button class="btn" data-m="ir">📡 Инфрақызыл</button></div>
+  <canvas class="lab" id="cTh" width="840" height="330"></canvas>
+  <div class="ctl"><div class="lab">Зерттелетін дененің температурасы <span class="val" id="thTv"></span></div><input type="range" id="thT" min="-20" max="100" step="1" value="25"></div>
+  <div class="tip" id="thTxt" style="font-size:16.5px"></div>
+  <div class="egrid" style="grid-template-columns:1fr 1fr 1fr">
+    <div class="exm"><div class="et" style="font-size:16px">Медициналық термометрде неге спирт емес сынап қолданылған?</div><div class="sl" style="font-size:15.5px">Сынап жылуды жақсы өткізеді, тез тепе-теңдікке келеді, бірқалыпты ұлғаяды, шыныға жұқпайды.</div></div>
+    <div class="exm"><div class="et" style="font-size:16px">Түтіктің диаметрі неге бірдей болуы керек?</div><div class="sl" style="font-size:15.5px">Әйтпесе бір градусқа сәйкес бағана биіктігі әр жерде әртүрлі болып, шкала тең бөлінбейді.</div></div>
+    <div class="exm"><div class="et" style="font-size:16px">Дәлдік неге бату тереңдігіне тәуелді?</div><div class="sl" style="font-size:15.5px">Түтіктің ортадан шығып тұрған бөлігі басқа температурада болады, сондықтан көрсеткіш ауытқиды.</div></div>
+  </div>
+</section>
+
+<!-- 8 -->
+<section class="slide" data-title="Зертхана: температура шкалалары" data-hint="T = t + 273 · t°F = 32 + 1,8·t°C · t°C = (t°F − 32) / 1,8">
+  <h2 class="st" style="font-size:28px"><small>IV · Виртуалды зертхана</small>Цельсий, Фаренгейт, Кельвин <span style="font:16px 'Segoe UI';color:var(--muted)">қызыл сызықты жылжытыңыз</span></h2>
+  <canvas class="lab" id="cSc" width="840" height="380"></canvas>
+  <div class="row">
+    <div class="card grow" style="font-size:15.5px;line-height:1.4"><h3>Цельсий, 1742</h3>Мұздың еруі 0 °C, судың қайнауы 100 °C.<div class="ff">T = t + 273</div></div>
+    <div class="card grow" style="font-size:15.5px;line-height:1.4"><h3>Фаренгейт, 1724</h3>Мұз 32 °F, су 212 °F, 180 бөлік.<div class="ff">t°F = 32 + 1,8·t°C</div></div>
+    <div class="card grow" style="font-size:15.5px;line-height:1.4"><h3>Кельвин, 1848</h3>0 К – абсолют нөл, теріс мәні жоқ.<div class="ff">t°C = (t°F − 32) / 1,8</div></div>
+  </div>
+  <div class="exm"><div class="et" style="font-size:17px"><b>Жауабы қандай?</b> Неліктен абсолют нөлге тең температураға жету мүмкін емес?</div><div class="sl" style="font-size:16.5px">Денені суыту үшін одан суығырақ денеге энергия беру керек, ал 0 К-ге жақындаған сайын энергияны беретін орта қалмайды. Сондықтан ғалымдар абсолют нөлге тек жақындай алады (оқулық: градустың бірнеше миллиондық үлесіне дейін).</div></div>
+</section>
+
+<!-- 9 -->
+<section class="slide" data-title="Есеп шығару үлгілері" data-hint="Шкаланы анықта → формула → есептеу → бірлік">
+  <h2 class="st"><small>Бірге шығарамыз</small>Есеп шығару үлгілері <span style="font:15px 'Segoe UI';color:var(--muted)">(шешімін ашу үшін басыңыз)</span></h2>
+  <div class="egrid">
+    <div class="exm"><div class="et"><span class="en">1</span>20 °C температураны кельвинмен және Фаренгейтпен өрнекте.</div><div class="sl">T = 20 + 273 = <b>293 К</b><br>t°F = 32 + 1,8·20 = <b>68 °F</b></div></div>
+    <div class="exm"><div class="et"><span class="en">2</span>Ауа райы хабарында 95 °F делінді. Бұл Цельсиймен қанша?</div><div class="sl">t = (95 − 32) / 1,8 = 63 / 1,8 = <b>35 °C</b></div></div>
+    <div class="exm"><div class="et"><span class="en">3</span>27 °C температурадағы молекуланың орташа кинетикалық энергиясын тап.</div><div class="sl">T = 27 + 273 = 300 К<br>Ē = 1,5 · 1,38·10⁻²³ · 300 = <b>6,21·10⁻²¹ Дж</b></div></div>
+    <div class="exm"><div class="et"><span class="en">4</span>Ē = 8,28·10⁻²¹ Дж болатын газдың температурасы қандай?</div><div class="sl">T = 2Ē / (3k) = 16,56·10⁻²¹ / (4,14·10⁻²³) = <b>400 К</b><br>t = 400 − 273 = <b>127 °C</b></div></div>
+  </div>
+</section>
+
+<!-- 10 -->
+<section class="slide" data-title="Жаттығу 18" data-hint="T = t + 273 · t = T − 273 · t°C = (t°F − 32)/1,8 · t°F = 32 + 1,8·t°C">
+  <h2 class="st"><small>Оқулық · Жаттығу 18</small>Температураны бір шкаладан екіншісіне ауыстыр</h2>
+  <div class="ex18" id="ex18"></div>
+  <div class="fbox" id="ex18R" style="font-size:20px"></div>
+</section>
+
+<!-- 11 -->
+<section class="slide" data-title="ФС: дене қызуы" data-hint="t°C = (t°F − 32) / 1,8 · T = t + 273 · 98,6 °F = 37 °C">
+  <h2 class="st" style="font-size:28px"><small>Функционалдық сауаттылық</small>Шетелден келген термометр</h2>
+  <div class="card sit">Ағасы АҚШ-тан электрондық термометр әкелді, ол <b>Фаренгейтпен</b> көрсетеді. Әженің денесі ыстықтап тұр. Арман термометрді қолтығына қойды да, бірден алмақ болды. Дәрігер телефонмен: «Қызу 38,5 °C-тан жоғары болса, берген дәріні ішіңіз, 39 °C-тан асса, қайта хабарласыңыз» деді.</div>
+  <canvas class="lab" id="cBody" width="840" height="220"></canvas>
+  <div class="row" style="gap:8px"><button class="btn main" id="boGo">🌡 Термометрді қою</button><button class="btn" id="boRe">↺ Басынан</button></div>
+  <div class="qgrid" id="qBody"></div>
+</section>
+
+<!-- 12 -->
+<section class="slide" data-title="ФС: тепловизор" data-hint="Беткі температура неғұрлым жоғары болса, сол жерден жылу көбірек кетеді">
+  <h2 class="st" style="font-size:28px"><small>Функционалдық сауаттылық</small>Үйден жылу қайдан кетіп жатыр?</h2>
+  <div class="card sit">Қыста сырттағы ауа <b>−10 °C</b>. Үй жылуын сақтамай, көмір көп жұмсалады. Шебер тепловизормен және пирометрмен үйдің сыртын байланыссыз өлшеді. Кескінде жылы жерлер қызыл, суық жерлер көк.</div>
+  <canvas class="lab" id="cHouse" width="840" height="250"></canvas>
+  <div class="row" style="gap:6px;flex-wrap:wrap" id="hoB"><span style="align-self:center;font-size:15px;color:var(--muted)">Пирометрді бағыттау:</span><button class="btn" data-p="win">Терезе</button><button class="btn" data-p="door">Есік</button><button class="btn" data-p="wall">Қабырға</button><button class="btn" data-p="roof">Шатыр</button></div>
+  <div class="qgrid" id="qHouse"></div>
+</section>
+
+<!-- 13 -->
+<section class="slide" data-title="ФС: ыстық шәй" data-hint="t = (m₁t₁ + m₂t₂) / (m₁ + m₂) · Температура айырмасы: 1 °C = 1 К">
+  <h2 class="st" style="font-size:28px"><small>Функционалдық сауаттылық</small>Шәйді қалай суытамыз?</h2>
+  <div class="card sit">Кесеге <b>90 °C</b>, массасы <b>200 г</b> шәй құйылды. Тым ыстық, ал іше бастауға шамамен 60 °C қолайлы. Шәйге <b>30 °C</b> су қосамыз. Кесеге және ауаға кететін жылуды есептеуде ескермейміз.</div>
+  <canvas class="lab" id="cTea" width="840" height="210"></canvas>
+  <div class="ctlg"><div class="ctl" style="flex:1"><div class="lab">Қосылатын су <span class="val" id="teMv"></span></div><input type="range" id="teM" min="0" max="300" step="50" value="100"></div><button class="btn main" id="teGo">🫖 Суды қосу</button><button class="btn" id="teRe">↺</button></div>
+  <div class="qgrid" id="qTea"></div>
+</section>
+
+<!-- 14 -->
+<section class="slide" data-title="Деңгейлік тапсырмалар" data-hint="A – 4 балл, B – 8 балл, C – 8 балл. Барлығы 20 балл">
+  <h2 class="st"><small>Деңгейлік тапсырмалар · 20 балл</small>Жеке жұмыс</h2>
+  <div class="who">Оқушы: <select id="tkWho"></select><button class="btn" id="tkPrev">◀</button><button class="btn" id="tkNext">▶</button><span class="score" id="tkScore"></span></div>
+  <div class="row" style="gap:8px" id="lvTabs"><button class="btn on" data-v="A">A деңгей · 4 балл</button><button class="btn" data-v="B">B деңгей · 8 балл</button><button class="btn" data-v="C">C деңгей · 8 балл</button></div>
+  <div class="lvp" data-p="A">
+    <div class="tq"><div class="lv lvA">A1</div><div class="qt">27 °C температураны кельвинмен өрнекте.</div><div class="ans"><div class="ai">T = <input data-q="A1"> К <span class="r"></span></div></div></div>
+    <div class="tq"><div class="lv lvA">A2</div><div class="qt">400 К температураны Цельсиймен өрнекте.</div><div class="ans"><div class="ai">t = <input data-q="A2"> °C <span class="r"></span></div></div></div>
+    <div class="tq"><div class="lv lvA">A3</div><div class="qt">10 °C температураны Фаренгейтпен өрнекте.</div><div class="ans"><div class="ai">t = <input data-q="A3"> °F <span class="r"></span></div></div></div>
+    <div class="tq"><div class="lv lvA">A4</div><div class="qt">Екі дене жылулық тепе-теңдікке келді. Біреуінің температурасы 35 °C. Екіншісінікі қандай?</div><div class="ans"><div class="ai">t = <input data-q="A4"> °C <span class="r"></span></div></div></div>
+  </div>
+  <div class="lvp" data-p="B" style="display:none">
+    <div class="tq"><div class="lv lvB">B1</div><div class="qt">Ауа райы хабарында 77 °F делінді. Бұл Цельсиймен қанша? (2 балл)</div><div class="ans"><div class="ai">t = <input data-q="B1"> °C <span class="r"></span></div></div></div>
+    <div class="tq"><div class="lv lvB">B2</div><div class="qt">T = 200 К температурадағы молекуланың орташа кинетикалық энергиясын тап. (2 балл)</div><div class="ans"><div class="ai">Ē = <input data-q="B2"> ·10⁻²¹ Дж <span class="r"></span></div></div></div>
+    <div class="tq"><div class="lv lvB">B3</div><div class="qt">Су 20 °C-тан 70 °C-қа дейін қызды. Температура өзгерісі неше кельвин? (2 балл)</div><div class="ans"><div class="ai">ΔT = <input data-q="B3"> К <span class="r"></span></div></div></div>
+    <div class="tq"><div class="lv lvB">B4</div><div class="qt">80 °C-тағы 100 г су мен 20 °C-тағы 300 г су араластырылды. Жылу шығыны жоқ. Қоспаның температурасы қандай? (2 балл)</div><div class="ans"><div class="ai">t = <input data-q="B4"> °C <span class="r"></span></div></div></div>
+  </div>
+  <div class="lvp" data-p="C" style="display:none">
+    <div class="tq"><div class="lv lvC">C1</div><div class="qt">Газ молекуласының орташа кинетикалық энергиясы <b>1,035·10⁻²⁰ Дж</b>. Газдың абсолют температурасын және Цельсиймен температурасын тап. (4 балл)</div><div class="ans"><div class="ai">T = <input data-q="C1"> К <span class="r"></span></div><div class="ai">t = <input data-q="C2"> °C <span class="r"></span></div></div></div>
+    <div class="tq"><div class="lv lvC">C2</div><div class="qt">Цельсий мен Фаренгейт шкалаларының көрсеткіштері қай температурада сан жағынан бірдей болады? Осы температураны кельвинмен де жаз. (4 балл)</div><div class="ans"><div class="ai">t = <input data-q="C3"> °C <span class="r"></span></div><div class="ai">T = <input data-q="C4"> К <span class="r"></span></div></div></div>
+  </div>
+  <div class="tip" style="font-size:15px">Жауапты жазып, <b>Enter</b> немесе <b>✓</b> бас. Әр сұраққа 2 мүмкіндік: бірінші реттен дұрыс – толық балл, екінші реттен – жартысы. Теріс санды минуспен жаз.</div>
+</section>
+
+<!-- 15 -->
+<section class="slide nofit" data-title="Бағалау парағы" data-wide="1">
+  <h2 class="st"><small>Жеке жұмыс нәтижесі</small>Кім қанша балл жинады?</h2>
+  <div class="gwrap">
+    <div class="gtab"><table class="t" id="grTab"></table></div>
+    <div class="col">
+      <div class="sum"><div style="border-top:5px solid var(--green)"><b id="g1">0</b>18–20</div><div style="border-top:5px solid var(--blue)"><b id="g2">0</b>14–17</div><div style="border-top:5px solid var(--yellow)"><b id="g3">0</b>9–13</div><div style="border-top:5px solid var(--red)"><b id="g4">0</b>0–8</div></div>
+      <div class="card col" style="flex:1;min-height:0"><h3>Сынып тізімі (әр жолға бір оқушы)</h3>
+        <textarea class="roster" id="roster" spellcheck="false"></textarea>
+        <div style="display:flex;gap:6px"><button class="btn main" id="rsSave">Тізімді сақтау</button><button class="btn" id="grClr">Нәтижелерді тазалау</button></div></div>
+      <div style="font-size:13.5px;color:var(--muted)">Баға: 18–20 балл – «5», 14–17 – «4», 9–13 – «3», 0–8 – «2».</div>
+    </div>
+  </div>
+</section>
+
+<!-- 16 -->
+<section class="slide nofit" id="slRace" data-wide="1" data-title="Көлік жарысы" data-hint="">
+  <div class="rcw"><div id="rcTop"></div><canvas class="lab" id="cRace" width="1540" height="540"></canvas><div id="rcBot"></div></div>
+</section>
+
+<!-- 17 -->
+<section class="slide" data-title="Қорытынды және үй тапсырмасы" data-hint="Бүгін не білдім?">
+  <h2 class="st"><small>Қорытынды</small>Есте сақтайық</h2>
+  <div class="duo"><div class="pa">
+  <div class="row">
+    <div class="card grow"><h3>Параметрлер</h3><div style="font:23px 'Cambria Math',serif">V, p, T</div><div style="font-size:15px;color:var(--muted)">тұтас денені сипаттайды</div></div>
+    <div class="card grow"><h3>Тепе-теңдік</h3><div style="font:23px 'Cambria Math',serif">t₁ = t₂</div><div style="font-size:15px;color:var(--muted)">энергия ыстықтан суыққа өтеді</div></div>
+    <div class="card grow"><h3>Энергия</h3><div style="font:23px 'Cambria Math',serif">Ē = (3/2)kT</div><div style="font-size:15px;color:var(--muted)">T көбейсе, Ē көбейеді</div></div>
+    <div class="card grow"><h3>Шкалалар</h3><div style="font:21px 'Cambria Math',serif">T = t + 273</div><div style="font:18px 'Cambria Math',serif">t°F = 32 + 1,8t</div></div>
+  </div>
+  </div><div class="pb">
+  <div class="card"><h3>Үй тапсырмасы</h3>
+    <ol style="margin:0;padding-left:22px;font-size:18px;line-height:1.6">
+      <li>§18 оқу. Анықтамаларды жаттау.</li>
+      <li><b>2-тапсырма:</b> дәптерге бөлмелік, зертханалық және медициналық термометрлерді сызып, негізгі айырмашылығын көрсету.</li>
+      <li><b>Функционалдық тапсырма:</b> үйдегі термометрмен бөлме ауасын, шәугімдегі ыстық суды және тоңазытқыш ішін өлшеп, үш шкалада кесте жасау.</li>
+    </ol></div>
+</div></div>
+</section>
+
+    </div>
+    <div class="rightw" id="rightw">
+      <div class="grip" id="grip">⇢ тақтаны жылжыт</div>
+      <div class="board">
+        <div class="tools">
+          <button class="sw on" data-c="#f2efe2" style="background:#f2efe2" title="Бор"></button>
+          <button class="sw" data-c="#ffd75e" style="background:#ffd75e" title="Сары"></button>
+          <button class="sw" data-c="#ff8fa3" style="background:#ff8fa3" title="Қызғылт"></button>
+          <button class="sw" data-c="#7fd8ff" style="background:#7fd8ff" title="Көгілдір"></button>
+          <button class="sw" data-c="#9be37f" style="background:#9be37f" title="Жасыл"></button>
+          <button class="tb" data-w="2.2">жіңішке</button><button class="tb on" data-w="3.6">орташа</button><button class="tb" data-w="6.5">жуан</button>
+          <span class="gapx"></span>
+          <button class="tb" id="erase">⌫ өшір</button><button class="tb" id="undo" title="Ctrl+Z">↶</button><button class="tb" id="wipe">тазалау</button><button class="tb" id="hideB" title="Тақтаны жасыру (T)">✕</button>
+        </div>
+        <div class="bhint" id="bhint"></div>
+        <canvas id="ink"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="btab" id="btab">✎ ТАҚТА</div>
+  <div class="bottom">
+    <button class="btn" id="prev">◀ Артқа</button><div class="dots" id="dots"></div><button class="btn main" id="next">Келесі ▶</button>
+    <span class="cnt" id="cnt"></span><button class="btn" id="zm" title="Тапсырманы үлкейту (Z)">🔍 Жақындату</button><button class="btn" id="snd">🔊</button>
+  </div>
+  <div class="toast" id="toast"></div>
+  <div class="phov" id="phOv" style="display:none"><div class="phbox"><button class="zx" id="phClose" style="top:10px;right:10px;position:absolute;width:48px;height:48px;font-size:22px">✕</button><h3 style="margin:0;font:700 30px Georgia,serif">Кешіккендер: QR-ды сканерле</h3><div class="qrb" data-qr style="width:460px;height:460px"></div><div data-url style="font:700 18px Consolas,monospace;color:var(--blue)"></div><div class="nmg" id="phOvN" style="justify-content:center"></div></div></div>
+  <div class="zov" id="zov"><div class="zwrap" id="zWrap"></div><button class="zx" id="zx" title="Жабу (Esc)">✕</button><div class="zhint">Жабу: ✕, Esc немесе бос жерді басу</div></div>
+</div>
+
+<script src="qrcode.min.js"></script>
+<script src="mqtt.min.js"></script>
+<script src="net.js"></script>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const nf=(v,d=4)=>{ if(!isFinite(v)) return '—'; let s=String(+v.toFixed(d)); if(s.includes('e')) return s; return s.replace('.',','); };
+const g1=v=>(Math.round(v*10)/10).toFixed(1).replace('.',',');
+let toastT; function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2600); }
+const store={ get(k,d){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } }, set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} } };
+function parseNum(s){ s=String(s).trim().replace(/\s/g,'').replace(/,/g,'.').replace(/[×x*]/g,'·').replace(/−/g,'-');
+  if(s==='') return NaN;
+  let m=/^(-?[\d.]+)·10\^?\(?(-?\d+)\)?$/.exec(s); if(m) return Number(m[1])*Math.pow(10,+m[2]);
+  m=/^10\^\(?(-?\d+)\)?$/.exec(s); if(m) return Math.pow(10,+m[1]);
+  return Number(s); }
+const near=(a,b)=>Math.abs(a-b)<=Math.max(1e-9,Math.abs(b)*1e-6);
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+/* ---------- дыбыс ---------- */
+const SND=(()=>{ let ac=null,on=store.get('tm_snd',true);
+  function init(){ if(ac){ if(ac.state==='suspended') ac.resume(); return; } const C=window.AudioContext||window.webkitAudioContext; if(C) ac=new C(); }
+  function tone(f,d,vol=.15,at=0,type='sine'){ if(!ac||!on) return; const t=ac.currentTime+at,o=ac.createOscillator(),g=ac.createGain();
+    o.type=type; o.frequency.value=f; g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(vol,t+.01); g.gain.exponentialRampToValueAtTime(.0001,t+d); o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t+d+.02); }
+  return { init, get on(){return on;}, toggle(){ on=!on; store.set('tm_snd',on); return on; },
+    ok(){ tone(660,.14); tone(990,.25,.15,.11); }, bad(){ tone(190,.3,.08,0,'square'); }, page(){ tone(520,.07,.04); },
+    clink(){ tone(2100,.08,.06); tone(2900,.06,.03,.02); }, beep(){ tone(1046,.12,.12); },
+    spin(){ tone(700+Math.random()*500,.05,.05); },
+    bell(){ [784,988,1175,1568].forEach((f,i)=>tone(f,.35,.14,i*.16)); } };
+})();
+document.addEventListener('pointerdown',()=>SND.init(),{capture:true});
+/* ---------- сурет көмекшілері ---------- */
+function rr(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+function label(ctx,t,x,y,col='#1d2430',size=13,align='center',bold=false,font='Segoe UI, sans-serif'){ ctx.fillStyle=col; ctx.font=(bold?'700 ':'')+size+'px '+font; ctx.textAlign=align; ctx.fillText(t,x,y); ctx.textAlign='left'; }
+function table_(ctx,w,h,y){ ctx.fillStyle='#b98a5a'; ctx.fillRect(0,y,w,h-y); ctx.fillStyle='#a3774a'; ctx.fillRect(0,y,w,6); ctx.strokeStyle='rgba(0,0,0,.08)'; for(let x=30;x<w;x+=90){ ctx.beginPath(); ctx.moveTo(x,y+10); ctx.lineTo(x+40,h); ctx.stroke(); } }
+const LABS={};
+let TT=0;
+
+/* ---------- ортақ көмекшілер ---------- */
+const grp=n=>String(Math.round(n)).replace('-','−').replace(/\B(?=(\d{3})+(?!\d))/g,' ');
+function arrow(ctx,x1,y1,x2,y2,col,w=4,hd=12){ const a=Math.atan2(y2-y1,x2-x1); ctx.strokeStyle=col; ctx.fillStyle=col; ctx.lineWidth=w;
+  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2-Math.cos(a)*hd*.8,y2-Math.sin(a)*hd*.8); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x2,y2); ctx.lineTo(x2-Math.cos(a-.42)*hd,y2-Math.sin(a-.42)*hd); ctx.lineTo(x2-Math.cos(a+.42)*hd,y2-Math.sin(a+.42)*hd); ctx.closePath(); ctx.fill(); }
+function dim(ctx,x,y1,y2,t,col='#1d2430'){ ctx.strokeStyle=col; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(x,y1); ctx.lineTo(x,y2); ctx.stroke();
+  for(const [y,s] of [[y1,1],[y2,-1]]){ const d=Math.sign(y2-y1)*s*7; ctx.beginPath(); ctx.moveTo(x-5,y+d); ctx.lineTo(x,y); ctx.lineTo(x+5,y+d); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x-9,y); ctx.lineTo(x+9,y); ctx.stroke(); }
+  label(ctx,t,x-8,(y1+y2)/2+6,col,17,'right',true,'Georgia, serif'); }
+function molMake(n){ return Array.from({length:n},()=>({u:Math.random(),v:Math.random(),a:Math.random()*6.283})); }
+function molStep(M,dt,sp){ for(const m of M){ m.a+=(Math.random()-.5)*.7; m.u+=Math.cos(m.a)*sp*dt; m.v+=Math.sin(m.a)*sp*dt;
+  if(m.u<0){ m.u=-m.u; m.a=Math.PI-m.a; } if(m.u>1){ m.u=2-m.u; m.a=Math.PI-m.a; } if(m.v<0){ m.v=-m.v; m.a=-m.a; } if(m.v>1){ m.v=2-m.v; m.a=-m.a; } } }
+function molDraw(ctx,M,x,y,w,h,col,r=3){ if(h<2*r) return; ctx.fillStyle=col; for(const m of M){ ctx.beginPath(); ctx.arc(x+r+m.u*(w-2*r),y+r+m.v*(h-2*r),r,0,7); ctx.fill(); } }
+function flame(ctx,x,y,t,s=1){ for(const [c,k] of [['#e0662f',1],['#ffcf4a',.6]]){ ctx.fillStyle=c; ctx.beginPath(); for(let i=-2;i<=2;i++){ const fx=x+i*11*s, fh=(26+8*Math.sin(t*14+i*1.7))*s*k;
+  ctx.moveTo(fx-7*s*k,y); ctx.quadraticCurveTo(fx-6*s*k,y-fh*.5,fx,y-fh); ctx.quadraticCurveTo(fx+6*s*k,y-fh*.5,fx+7*s*k,y); } ctx.fill(); } }
+function mixc(a,b,k){ return a.map((v,i)=>Math.round(v+(b[i]-v)*k)).join(','); }
+function thermo(ctx,x,y1,y2,k,txt){ k=Math.max(0,Math.min(1,k)); ctx.fillStyle='#fff'; rr(ctx,x-9,y1,18,y2-y1,9); ctx.fill(); ctx.strokeStyle='#8d939a'; ctx.lineWidth=1.5; ctx.stroke();
+  ctx.fillStyle='#c8352b'; ctx.beginPath(); ctx.arc(x,y2+8,14,0,7); ctx.fill(); ctx.fillRect(x-4,y2-(y2-y1-12)*k,8,(y2-y1-12)*k+8);
+  for(let i=0;i<=8;i++){ const y=y2-(y2-y1-12)*i/8; ctx.strokeStyle='#8d939a'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(x+9,y); ctx.lineTo(x+14,y); ctx.stroke(); }
+  if(txt) label(ctx,txt,x,y1-10,'#1d2430',15,'center',true); }
+
+/* ---------- тексерілетін сұрақ (2 мүмкіндік) ---------- */
+function mkQ(box,o,i,cb){ const d=document.createElement('div'); d.className='qk';
+  d.innerHTML=`<div class="qn">${o.n||('Сұрақ '+(i+1))}</div><div class="qt">${o.q}</div><div class="qa"></div><div class="qr"></div>`; box.appendChild(d);
+  const qa=d.querySelector('.qa'), qr=d.querySelector('.qr'); let left=2, done=false;
+  const show=o.show||(o.ch?o.ch[o.a]:nf(o.a,6)+' '+(o.unit||''));
+  function fin(ok){ done=true; d.classList.add(ok?'good':'fail'); qa.querySelectorAll('input,button').forEach(x=>x.disabled=true);
+    if(o.ch) qa.querySelectorAll('.ch').forEach((b,j)=>{ if(j===o.a) b.classList.add('ok'); });
+    qr.innerHTML=(ok?'<span class="good">✔ Дұрыс!</span>':'<span class="bad">✘ Дұрыс жауабы: '+show+'</span>')+(o.sol?'<span class="sol">'+o.sol+'</span>':''); fitSlide(slides[cur]); if(cb) cb(ok); }
+  function miss(){ left--; SND.bad(); if(left<=0) fin(false); else qr.innerHTML='<span class="bad">✘ Қате, тағы 1 мүмкіндік.</span>'+(o.hint?' <span style="color:var(--muted)">Кеңес: '+o.hint+'</span>':''); }
+  if(o.ch) o.ch.forEach((t,j)=>{ const b=document.createElement('button'); b.className='ch'; b.innerHTML=t;
+    b.onclick=()=>{ if(done) return; if(j===o.a){ SND.ok(); fin(true); } else { b.classList.add('no'); b.disabled=true; miss(); } }; qa.appendChild(b); });
+  else { qa.innerHTML=(o.pre?'<span>'+o.pre+'</span>':'')+'<input placeholder="?">'+(o.unit?'<span>'+o.unit+'</span>':'')+'<button class="btn main">Тексеру</button>';
+    const inp=qa.querySelector('input'), check=()=>{ if(done) return; const v=parseNum(inp.value); if(!isFinite(v)){ toast('Санды жаз'); return; }
+      if(Math.abs(v-o.a)<=Math.abs(o.a)*(o.tol||.01)+1e-9){ SND.ok(); fin(true); } else { miss(); inp.select(); } };
+    qa.querySelector('button').onclick=check; inp.addEventListener('keydown',e=>{ if(e.key==='Enter') check(); }); }
+  return d; }
+
+/* ---------- §18 зертханалары ---------- */
+const COLH='#c8352b', COLC='#1f5fa8', fx1=(v,d=1)=>(+v).toFixed(d).replace('.',',').replace('-','−');
+const heatCol=k=>mixc([70,130,210],[225,70,45],Math.max(0,Math.min(1,k)));
+function beaker(ctx,x,y,w,h,k){ ctx.fillStyle=`rgba(${heatCol(k)},.34)`; ctx.fillRect(x,y,w,h); ctx.strokeStyle='#5d6670'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(x,y-22); ctx.lineTo(x,y+h); ctx.lineTo(x+w,y+h); ctx.lineTo(x+w,y-22); ctx.stroke(); }
+const exmBind=()=>document.querySelectorAll('.exm').forEach(e=>e.onclick=()=>{ e.classList.toggle('open'); SND.clink(); fitSlide(slides[cur]); });
+
+/* 1. Кіріспе: стақан және үш термометр */
+const TI={t:0,M:molMake(36)};
+LABS.cTitle={frame(ctx,w,h,dt){ TI.t+=dt; const o=.5-.5*Math.cos(TI.t*.7), tc=10+80*o; ctx.fillStyle='#efe9da'; ctx.fillRect(0,0,w,h);
+  beaker(ctx,70,80,250,180,o); molStep(TI.M,dt,.08+.55*o); molDraw(ctx,TI.M,70,80,250,180,o>.5?'#a8391f':'#1f5fa8',4); if(o>.05) flame(ctx,195,290,TI.t,.3+o*.7);
+  [['°C',tc,COLH],['К',tc+273,'#2d5f6f'],['°F',32+1.8*tc,'#b07d1c']].forEach(([u,v,c],i)=>{ const x=430+i*140; thermo(ctx,x,50,230,.1+.8*o); label(ctx,Math.round(v)+' '+u,x,30,c,23,'center',true,'Georgia, serif'); });
+  label(ctx,'бір ғана температура, үш шкала',640,288,'#6a6658',15); }};
+
+/* 2. Молекулалар */
+const MO={A:molMake(36),B:molMake(36)};
+LABS.cMol={frame(ctx,w,h,dt){ ctx.fillStyle='#efe9da'; ctx.fillRect(0,0,w,h);
+  [[MO.B,50,'Суық су, 10 °C',.1,'#1f5fa8',.05],[MO.A,450,'Ыстық су, 90 °C',.7,'#a8391f',.85]].forEach(([M,x,t,sp,c,k])=>{ beaker(ctx,x,50,340,190,k); molStep(M,dt,sp); molDraw(ctx,M,x,50,340,190,c,4.5); label(ctx,t,x+170,28,c,21,'center',true); M.slice(0,8).forEach(m=>{ const px=x+m.u*340,py=50+m.v*190; arrow(ctx,px,py,px+Math.cos(m.a)*sp*50,py+Math.sin(m.a)*sp*50,c,1.5,6); }); }); }};
+
+/* 3. Жүйе */
+const SY={M:molMake(30)};
+LABS.cSys={frame(ctx,w,h,dt){ ctx.fillStyle='#e6edf0'; ctx.fillRect(0,0,w,h); label(ctx,'ҚОРШАҒАН ОРТА',18,28,'#5f7a88',16,'left',true);
+  ctx.setLineDash([9,6]); ctx.strokeStyle='#b8442f'; ctx.lineWidth=3; rr(ctx,70,44,300,250,16); ctx.stroke(); ctx.setLineDash([]); label(ctx,'жүйе шекарасы',220,284,'#b8442f',14,'center',true);
+  const X0=130,X1=310,B=250,yb=120; ctx.fillStyle='rgba(120,170,230,.38)'; ctx.fillRect(X0,yb,X1-X0,B-yb); molStep(SY.M,dt,.3); molDraw(ctx,SY.M,X0,yb,X1-X0,B-yb,'#1f5fa8',3.5);
+  ctx.fillStyle='#6d737b'; ctx.fillRect(X0-7,70,7,B-62); ctx.fillRect(X1,70,7,B-62); ctx.fillRect(X0-7,B,X1-X0+14,8); ctx.fillStyle='#c3c8ce'; ctx.fillRect(X0,yb-14,X1-X0,14);
+  const m=SY.M[0], mx=X0+3+m.u*(X1-X0-6), my=yb+3+m.v*(B-yb-6); ctx.strokeStyle='#b8442f'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(mx,my,9,0,7); ctx.stroke(); ctx.beginPath(); ctx.moveTo(mx+9,my); ctx.lineTo(450,120); ctx.stroke();
+  ctx.fillStyle='#fff'; rr(ctx,450,40,350,120,8); ctx.fill(); ctx.strokeStyle='#d8d0bd'; ctx.lineWidth=1; ctx.stroke(); label(ctx,'МИКРО · бір молекула',468,68,'#b8442f',16,'left',true); label(ctx,'жылдамдығы v, массасы m₀',468,98,'#1d2430',18,'left'); label(ctx,'кинетикалық энергиясы E₀',468,128,'#1d2430',18,'left');
+  ctx.fillStyle='#fff'; rr(ctx,450,175,350,120,8); ctx.fill(); ctx.stroke(); label(ctx,'МАКРО · тұтас газ',468,203,'#2d5f6f',16,'left',true); label(ctx,'V = 2 л      p = 100 кПа',468,236,'#1d2430',20,'left',true,'Georgia, serif'); label(ctx,'T = 300 К',468,268,'#1d2430',20,'left',true,'Georgia, serif'); }};
+
+/* 4. Сұрыптау */
+const SRT=[['Дене көлемі',1],['Молекула жылдамдығы',0],['Молекула массасы',0],['Қысым',1],['Молекуланың қозғалыс энергиясы',0],['Молекулалар саны',1],['Температура',1],['Молекула өлшемі',0],['Концентрация',1]];
+(()=>{ const box=$('srt'); let done=0,right=0; const res=()=>{ $('srtR').innerHTML=done<SRT.length?`Дұрыс: <b>${right}</b> · қалды: <b>${SRT.length-done}</b>`:`Дұрыс: <b>${right} / ${SRT.length}</b>. Макро шамалар тұтас денені сипаттайды, микро шамалар бір молекуланы сипаттайды.`; };
+  SRT.forEach(([n,a])=>{ const d=document.createElement('div'); d.className='sri'; d.innerHTML=`<span>${n}</span><div><button class="btn">микро</button><button class="btn">макро</button></div>`; const bs=d.querySelectorAll('button');
+    bs.forEach((b,j)=>b.onclick=()=>{ bs.forEach(x=>x.disabled=true); done++; if(j===a){ right++; SND.ok(); d.classList.add('ok'); } else { SND.bad(); d.classList.add('no'); } d.querySelector('span').innerHTML=`${n} <b>– ${a?'макро':'микро'}</b>`; res(); }); box.appendChild(d); }); res(); })();
+
+/* 5. Тепе-теңдік */
+const HE={on:false,tau:0,hist:[],M1:molMake(26),M2:molMake(26)};
+function heVals(){ return {t1:+$('heT1').value,t2:+$('heT2').value,m1:+$('heM1').value,m2:+$('heM2').value}; }
+function heUi(){ const v=heVals(); $('heT1v').textContent=v.t1+' °C'; $('heT2v').textContent=v.t2+' °C'; $('heM1v').textContent=v.m1+' г'; $('heM2v').textContent=v.m2+' г'; }
+function heReset(){ HE.on=false; HE.tau=0; HE.hist=[]; heUi(); $('heGo').disabled=false; }
+['heT1','heT2','heM1','heM2'].forEach(i=>$(i).oninput=heReset); $('heGo').onclick=()=>{ HE.on=true; $('heGo').disabled=true; SND.beep(); }; $('heRe').onclick=heReset; heReset();
+LABS.cHeq={frame(ctx,w,h,dt){ const v=heVals(), tf=(v.m1*v.t1+v.m2*v.t2)/(v.m1+v.m2); if(HE.on){ HE.tau+=dt; if(!HE.hist.length||HE.tau-HE.hist[HE.hist.length-1][0]>.1) HE.hist.push([HE.tau,0]); } const e=Math.exp(-HE.tau/2.2), T1=tf+(v.t1-tf)*e, T2=tf+(v.t2-tf)*e, eq=HE.on&&Math.abs(T1-T2)<.3;
+  ctx.fillStyle='#efe9da'; ctx.fillRect(0,0,w,h); const Y=70,H=200,hA=H*(.45+.55*v.m1/500),hB=H*(.45+.55*v.m2/500);
+  beaker(ctx,24,Y+H-hA,170,hA,T1/100); beaker(ctx,216,Y+H-hB,170,hB,T2/100); molStep(HE.M1,dt,.06+.6*T1/100); molStep(HE.M2,dt,.06+.6*T2/100); molDraw(ctx,HE.M1,24,Y+H-hA,170,hA,T1>50?'#a8391f':'#1f5fa8',3.5); molDraw(ctx,HE.M2,216,Y+H-hB,170,hB,T2>50?'#a8391f':'#1f5fa8',3.5);
+  ctx.fillStyle=HE.on?'#c79a3a':'#c9c3b2'; ctx.fillRect(194,Y+H-44,22,44); if(HE.on&&!eq){ const k=(TT*40)%22; arrow(ctx,186+k*.3,Y+H-22,226+k*.3,Y+H-22,COLH,4,11); label(ctx,'энергия',205,Y+H-52,COLH,14,'center',true); }
+  label(ctx,`${fx1(T1)} °C`,109,40,T1>T2?COLH:COLC,24,'center',true,'Georgia, serif'); label(ctx,`${fx1(T2)} °C`,301,40,COLC,24,'center',true,'Georgia, serif'); label(ctx,v.m1+' г',109,Y+H+22,'#6a6658',15); label(ctx,v.m2+' г',301,Y+H+22,'#6a6658',15);
+  const st=!HE.on?'Әлі байланыс жоқ':eq?'✔ ТЕПЕ-ТЕҢДІК: t₁ = t₂':'Тепе-теңдік ЕМЕС: энергия алмасу жүріп жатыр'; label(ctx,st,205,h-14,eq?'#2e7d4f':'#b8442f',16,'center',true);
+  const O=[470,290],G=[840-24-470,250],X=q=>O[0]+q/10*G[0],Yy=q=>O[1]-q/100*G[1]; ctx.fillStyle='#fff'; ctx.fillRect(O[0],O[1]-G[1],G[0],G[1]); for(let q=20;q<=100;q+=20){ ctx.strokeStyle='#e4decd'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(O[0],Yy(q)); ctx.lineTo(O[0]+G[0],Yy(q)); ctx.stroke(); label(ctx,q,O[0]-5,Yy(q)+4,'#6a6658',12,'right'); }
+  [[v.t1,COLH],[v.t2,COLC]].forEach(([t0,c])=>{ ctx.strokeStyle=c; ctx.lineWidth=3; ctx.beginPath(); const n=Math.min(HE.tau,10); for(let q=0;q<=n+.001;q+=.1){ const y=tf+(t0-tf)*Math.exp(-q/2.2); q?ctx.lineTo(X(q),Yy(y)):ctx.moveTo(X(q),Yy(y)); } ctx.stroke(); });
+  ctx.setLineDash([5,5]); ctx.strokeStyle='#2e7d4f'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(O[0],Yy(tf)); ctx.lineTo(O[0]+G[0],Yy(tf)); ctx.stroke(); ctx.setLineDash([]);
+  if(eq) label(ctx,`t = ${fx1(tf)} °C`,O[0]+G[0]-6,Yy(tf)-7,'#2e7d4f',17,'right',true);
+  arrow(ctx,O[0],O[1],O[0],O[1]-G[1]-12,'#1d2430',2,9); arrow(ctx,O[0],O[1],O[0]+G[0]+8,O[1],'#1d2430',2,9); label(ctx,'t, °C',O[0]+6,O[1]-G[1]-2,'#1d2430',13,'left',true); label(ctx,'уақыт',O[0]+G[0],O[1]+18,'#1d2430',13,'right',true); }};
+[{q:'200 г 80 °C су мен 200 г 20 °C су араласты. Жылу шығыны жоқ. Соңғы температура?',pre:'t = ',a:50,unit:'°C',hint:'Массалары бірдей: орта мән',sol:'t = (80 + 20) / 2 = 50 °C. Зертханада тексер!'},
+ {q:'Жылулық тепе-теңдікте денелердің қай шамасы міндетті түрде бірдей?',ch:['Температурасы','Массасы','Ішкі энергиясы'],a:0,sol:'Ішкі энергия мен масса әртүрлі болуы мүмкін, ал температура бірдей.'}].forEach((o,i)=>mkQ($('qHeq'),o,i));
+
+/* 6. Температура және энергия */
+const KI={M:molMake(46)};
+$('kiT').oninput=()=>{ const T=+$('kiT').value; $('kiTv').textContent=`${T} К = ${T-273} °C`.replace('-','−'); }; $('kiT').oninput();
+LABS.cKin={frame(ctx,w,h,dt){ const T=+$('kiT').value, E=1.5*1.38e-2*T, sp=.75*Math.sqrt(T/1000), k=T/1000; ctx.fillStyle='#efe9da'; ctx.fillRect(0,0,w,h);
+  const Bx=24,By=24,Bw=400,Bh=290; ctx.fillStyle=`rgba(${heatCol(k)},.22)`; ctx.fillRect(Bx,By,Bw,Bh); ctx.strokeStyle='#5d6670'; ctx.lineWidth=3; ctx.strokeRect(Bx,By,Bw,Bh); molStep(KI.M,dt,sp); molDraw(ctx,KI.M,Bx,By,Bw,Bh,k>.45?'#a8391f':'#1f5fa8',5);
+  KI.M.slice(0,12).forEach(m=>{ const x=Bx+5+m.u*(Bw-10),y=By+5+m.v*(Bh-10),L=sp*46; if(L>3) arrow(ctx,x,y,x+Math.cos(m.a)*L,y+Math.sin(m.a)*L,'#1d2430',1.5,6); });
+  if(T===0){ ctx.fillStyle='rgba(255,255,255,.85)'; rr(ctx,Bx+60,By+110,Bw-120,60,8); ctx.fill(); label(ctx,'Абсолют нөл: қозғалыс тоқтайды',Bx+Bw/2,By+146,'#b8442f',17,'center',true); }
+  const O=[500,290],G=[300,240],X=q=>O[0]+q/1000*G[0],Y=q=>O[1]-q/21*G[1]; ctx.fillStyle='#fff'; ctx.fillRect(O[0],O[1]-G[1],G[0],G[1]); for(let q=200;q<=1000;q+=200){ ctx.strokeStyle='#e4decd'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(X(q),O[1]); ctx.lineTo(X(q),O[1]-G[1]); ctx.stroke(); label(ctx,q,X(q),O[1]+17,'#6a6658',12); }
+  for(let q=5;q<=20;q+=5){ label(ctx,q,O[0]-5,Y(q)+4,'#6a6658',12,'right'); }
+  ctx.strokeStyle='#b8442f'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(X(0),Y(0)); ctx.lineTo(X(1000),Y(20.7)); ctx.stroke(); ctx.fillStyle='#1d2430'; ctx.beginPath(); ctx.arc(X(T),Y(E),7,0,7); ctx.fill();
+  arrow(ctx,O[0],O[1],O[0],O[1]-G[1]-12,'#1d2430',2,9); arrow(ctx,O[0],O[1],O[0]+G[0]+12,O[1],'#1d2430',2,9); label(ctx,'Ē, ·10⁻²¹ Дж',O[0]+6,O[1]-G[1]-2,'#1d2430',13,'left',true); label(ctx,'T, К',O[0]+G[0]+8,O[1]+18,'#1d2430',13,'right',true);
+  label(ctx,`Ē = ${fx1(E,2)}·10⁻²¹ Дж`,O[0]+G[0]/2,h-8,'#b8442f',19,'center',true,'Georgia, serif'); }};
+[{q:'T = 300 К. Ē = ?',pre:'Ē = ',a:6.21,unit:'·10⁻²¹ Дж',hint:'Ē = 1,5 · 1,38·10⁻²³ · T',sol:'Ē = 1,5 · 1,38·10⁻²³ · 300 = 6,21·10⁻²¹ Дж'},
+ {q:'Абсолют температура 2 есе артса, Ē қалай өзгереді?',ch:['2 есе артады','4 есе артады','Өзгермейді'],a:0,sol:'Ē ~ T: тура пропорционал.'}].forEach((o,i)=>mkQ($('qKin'),o,i));
+
+/* 7. Термометрлер */
+const THT={liq:'<b>Сұйықтық термометрі:</b> сұйықтың жылулық ұлғаюына негізделген. Дәлдігі бөлік құнына, тепе-теңдік орнау мезетіне, бату тереңдігіне тәуелді.',
+ bim:'<b>Механикалық термометр:</b> жылулық ұлғаю коэффициенттері әртүрлі екі металл жолақ бір-біріне жалғанған. Қыздырғанда мыс қорытпадан көп ұлғаяды, биметалл бұралып, тілшені бұрады.',
+ gas:'<b>Газдық термометр:</b> газ толтырылған баллон манометрмен жалғанған. Температураны газдың қысымынан анықтайды. Оқулық бойынша барлық түрінің ішінде дәлдігі ең жоғары.',
+ ele:'<b>Электрлік (кедергі) термометр:</b> температура артқанда металл сымның кедергісі артады. Платина сымның кедергісін өлшеп, температураны табады.',
+ ir:'<b>Оптикалық және инфрақызыл термометр:</b> тепловизор мен пирометр дене шығаратын сәулені қабылдайды. Денеге тиіспей, қашықтан өлшейді.'};
+const TH={m:'liq',M:molMake(24)};
+function thUi(){ const t=+$('thT').value; $('thTv').textContent=(t+' °C').replace('-','−'); $('thTxt').innerHTML=THT[TH.m]; document.querySelectorAll('#thTabs [data-m]').forEach(b=>b.classList.toggle('on',b.dataset.m===TH.m)); }
+document.querySelectorAll('#thTabs [data-m]').forEach(b=>b.onclick=()=>{ TH.m=b.dataset.m; thUi(); SND.clink(); fitSlide(slides[cur]); }); $('thT').oninput=thUi; thUi();
+LABS.cTh={frame(ctx,w,h,dt){ const t=+$('thT').value,k=(t+20)/120; ctx.fillStyle='#efe9da'; ctx.fillRect(0,0,w,h); const col=`rgb(${heatCol(k)})`;
+  if(TH.m==='liq'){ const X=300,y0=270,y1=50,Y=q=>y0-(q+20)/120*(y0-y1); ctx.fillStyle='#fff'; rr(ctx,X-16,y1-20,32,y0-y1+36,14); ctx.fill(); ctx.strokeStyle='#8d939a'; ctx.lineWidth=2; ctx.stroke(); ctx.fillStyle='#c8352b'; ctx.beginPath(); ctx.arc(X,y0+30,28,0,7); ctx.fill(); ctx.fillRect(X-6,Y(t),12,y0+10-Y(t));
+    for(let q=-20;q<=100;q+=10){ ctx.strokeStyle='#1d2430'; ctx.lineWidth=q%20?1:2; ctx.beginPath(); ctx.moveTo(X+18,Y(q)); ctx.lineTo(X+(q%20?27:34),Y(q)); ctx.stroke(); if(!(q%20)) label(ctx,String(q).replace('-','−'),X+40,Y(q)+5,'#1d2430',15,'left'); }
+    label(ctx,`${t} °C`.replace('-','−'),600,120,col,44,'center',true,'Georgia, serif'); label(ctx,'Сұйық ұлғаяды,',600,170,'#1d2430',19); label(ctx,'бағана жоғары көтеріледі',600,196,'#1d2430',19); }
+  else if(TH.m==='bim'){ const cx=420,cy=210,R=150,a=Math.PI*(1.15+.7*k); ctx.fillStyle=`rgba(${heatCol(k)},.25)`; ctx.beginPath(); ctx.arc(cx,cy+60,120,0,7); ctx.fill(); ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(cx,cy,R,Math.PI,0); ctx.closePath(); ctx.fill(); ctx.strokeStyle='#4a4f57'; ctx.lineWidth=4; ctx.stroke();
+    for(let q=-20;q<=100;q+=20){ const kk=(q+20)/120,aa=Math.PI*(1.15+.7*kk); ctx.strokeStyle='#1d2430'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(cx+Math.cos(aa)*(R-12),cy+Math.sin(aa)*(R-12)); ctx.lineTo(cx+Math.cos(aa)*(R-3),cy+Math.sin(aa)*(R-3)); ctx.stroke(); label(ctx,String(q).replace('-','−'),cx+Math.cos(aa)*(R-30),cy+Math.sin(aa)*(R-30)+5,'#1d2430',15); }
+    ctx.strokeStyle='#b8442f'; ctx.lineWidth=5; ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+Math.cos(a)*(R-44),cy+Math.sin(a)*(R-44)); ctx.stroke();
+    const bend=(k-.17)*34; for(const [c,off,n] of [['#c9792b',-5,'мыс'],['#8d939a',5,'қорытпа']]){ ctx.strokeStyle=c; ctx.lineWidth=9; ctx.beginPath(); ctx.moveTo(cx+off,cy+110); ctx.quadraticCurveTo(cx+off,cy+60,cx+off+bend,cy+6); ctx.stroke(); } label(ctx,'мыс',cx-44,cy+96,'#a4601f',15,'center',true); label(ctx,'қорытпа',cx+58,cy+96,'#5d6670',15,'center',true); label(ctx,`${t} °C`.replace('-','−'),700,120,col,40,'center',true,'Georgia, serif'); }
+  else if(TH.m==='gas'){ const T=t+273,p=100*T/273; beaker(ctx,60,110,240,170,k); ctx.fillStyle='#d8dde3'; ctx.beginPath(); ctx.arc(180,195,62,0,7); ctx.fill(); ctx.strokeStyle='#5d6670'; ctx.lineWidth=3; ctx.stroke(); molStep(TH.M,dt,.1+.5*k); molDraw(ctx,TH.M,140,155,80,80,k>.5?'#a8391f':'#1f5fa8',3);
+    ctx.strokeStyle='#5d6670'; ctx.lineWidth=7; ctx.beginPath(); ctx.moveTo(180,133); ctx.lineTo(180,62); ctx.lineTo(420,62); ctx.lineTo(420,280); ctx.quadraticCurveTo(420,300,450,300); ctx.quadraticCurveTo(480,300,480,280); ctx.lineTo(480,60); ctx.stroke();
+    const dy=(p-100)*1.5, yl=200+dy, yr=200-dy; ctx.strokeStyle='#c8352b'; ctx.lineWidth=5; ctx.beginPath(); ctx.moveTo(420,yl); ctx.lineTo(420,280); ctx.quadraticCurveTo(420,300,450,300); ctx.quadraticCurveTo(480,300,480,280); ctx.lineTo(480,yr); ctx.stroke(); label(ctx,'манометр',450,48,'#1d2430',15,'center',true);
+    label(ctx,`p = ${Math.round(p)} кПа`,680,120,'#b8442f',30,'center',true,'Georgia, serif'); label(ctx,`T = ${T} К`,680,160,'#1d2430',24,'center',true,'Georgia, serif'); label(ctx,`${t} °C`.replace('-','−'),680,198,col,24,'center',true,'Georgia, serif'); }
+  else if(TH.m==='ele'){ const R=100*(1+.00385*t); ctx.fillStyle=`rgba(${heatCol(k)},.25)`; rr(ctx,50,100,300,130,12); ctx.fill(); ctx.strokeStyle='#c79a3a'; ctx.lineWidth=4; ctx.beginPath(); for(let x=70;x<=330;x+=6){ const y=165+Math.sin((x-70)/8)*22; x===70?ctx.moveTo(x,y):ctx.lineTo(x,y); } ctx.stroke(); label(ctx,'платина сым',200,92,'#7d6a35',16,'center',true);
+    ctx.strokeStyle='#1d2430'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(330,165); ctx.lineTo(480,165); ctx.moveTo(70,165); ctx.lineTo(30,165); ctx.lineTo(30,285); ctx.lineTo(620,285); ctx.lineTo(620,215); ctx.stroke(); ctx.fillStyle='#22302a'; rr(ctx,480,85,270,130,10); ctx.fill(); label(ctx,`${t} °C`.replace('-','−'),615,145,'#8ff0a4',42,'center',true,'Consolas, monospace'); label(ctx,`R = ${fx1(R,1)} Ом`,615,190,'#f6d77a',24,'center',true,'Consolas, monospace'); }
+  else { const ox=170,oy=170; ctx.fillStyle=col; ctx.beginPath(); ctx.arc(ox,oy,86,0,7); ctx.fill(); label(ctx,'дене',ox,oy+7,'#fff',22,'center',true); ctx.strokeStyle=col; ctx.lineWidth=3; for(let i=0;i<4;i++){ const f=((TT*.6+i/4)%1), x=270+f*240; ctx.globalAlpha=1-f*.7; ctx.beginPath(); for(let yy=-30;yy<=30;yy+=4){ const xx=x+Math.sin(yy/7+TT*5)*5; yy===-30?ctx.moveTo(xx,oy+yy):ctx.lineTo(xx,oy+yy); } ctx.stroke(); } ctx.globalAlpha=1;
+    ctx.fillStyle='#e0a92e'; rr(ctx,530,120,190,76,10); ctx.fill(); ctx.fillStyle='#4a4f57'; ctx.fillRect(610,196,44,92); ctx.fillStyle='#22302a'; rr(ctx,590,132,118,52,6); ctx.fill(); label(ctx,`${t} °C`.replace('-','−'),649,168,'#8ff0a4',27,'center',true,'Consolas, monospace'); label(ctx,'Байланыс жоқ, қашықтан өлшейді',430,312,'#1d2430',18,'center',true); } }};
+
+/* 8. Шкалалар */
+const SC={t:20,drag:false}; const scY=t=>352-(t+273)*306/393;
+(()=>{ const cv=$('cSc'), setT=e=>{ const r=cv.getBoundingClientRect(), y=(e.clientY-r.top)/r.height*cv.height; SC.t=Math.round(Math.max(-273,Math.min(120,(352-y)*393/306-273))); };
+  cv.addEventListener('pointerdown',e=>{ if(ZM.pick) return; SC.drag=true; cv.setPointerCapture(e.pointerId); setT(e); }); cv.addEventListener('pointermove',e=>{ if(SC.drag) setT(e); }); const up=()=>{ SC.drag=false; }; cv.addEventListener('pointerup',up); cv.addEventListener('pointercancel',up); cv.style.cursor='ns-resize'; })();
+LABS.cSc={frame(ctx,w,h){ const t=SC.t; ctx.fillStyle='#efe9da'; ctx.fillRect(0,0,w,h);
+  const cols=[[300,'F','Фаренгейт',v=>(v===-273?'-459':String(+(32+1.8*v).toFixed(1)).replace('.',','))+' °F','#b07d1c'],[480,'C','Цельсий',v=>v+' °C','#b8442f'],[660,'K','Кельвин',v=>(v+273)+' К','#2d5f6f']];
+  [[100,'Судың қайнауы'],[0,'Мұздың еруі'],[37,'Адам денесі'],[-273,'Абсолют нөл']].forEach(([q,n])=>{ const y=scY(q); ctx.setLineDash([5,5]); ctx.strokeStyle='#a7a18f'; ctx.lineWidth=1.3; ctx.beginPath(); ctx.moveTo(180,y); ctx.lineTo(760,y); ctx.stroke(); ctx.setLineDash([]); label(ctx,n,172,y+5,'#1d2430',15,'right',true); cols.forEach(c=>label(ctx,c[3](q).replace('-','−'),c[0]+18,y-4,'#6a6658',13.5,'left')); });
+  cols.forEach(c=>{ ctx.fillStyle='#3a3530'; ctx.fillRect(c[0]-5,scY(120),10,scY(-273)-scY(120)); label(ctx,c[2],c[0],22,c[4],18,'center',true); });
+  const y=scY(t); ctx.strokeStyle='#d6271c'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(190,y); ctx.lineTo(800,y); ctx.stroke();
+  cols.forEach(c=>{ const s=c[3](t).replace('-','−'); ctx.font='700 19px Georgia, serif'; const tw=ctx.measureText(s).width+16; ctx.fillStyle=c[4]; rr(ctx,c[0]-tw/2,y-14,tw,28,6); ctx.fill(); label(ctx,s,c[0],y+7,'#fff',19,'center',true,'Georgia, serif'); }); }};
+
+/* 10. Жаттығу 18 */
+const EX18=[{t:'1. Кельвинмен өрнекте',u:'К',r:[['20 °C',293],['27 °C',300],['−73 °C',200],['100 °C',373]]},{t:'2. Цельсиймен өрнекте',u:'°C',r:[['4 К',-269],['200 К',-73],['440 К',167],['300 К',27]]},{t:'3. Цельсиймен өрнекте',u:'°C',r:[['84,2 °F',29],['80,6 °F',27],['71,6 °F',22]]},{t:'4. Фаренгейтпен өрнекте',u:'°F',r:[['30 °C',86],['25 °C',77],['20 °C',68]]}];
+(()=>{ const box=$('ex18'), tot=EX18.reduce((a,g)=>a+g.r.length,0); let dn=0,ok=0; const res=()=>{ $('ex18R').innerHTML=`Орындалды: <b>${dn} / ${tot}</b> · дұрыс: <b>${ok}</b>`; };
+  EX18.forEach(g=>{ const c=document.createElement('div'); c.className='card'; c.innerHTML=`<h3>${g.t}</h3>`; g.r.forEach(([s,a])=>{ const d=document.createElement('div'); d.className='exr'; d.innerHTML=`<span class="x">${s} =</span><input><span>${g.u}</span><button class="btn">✓</button><span class="r"></span>`; const inp=d.querySelector('input'),r=d.querySelector('.r'),b=d.querySelector('button'); let left=2,done=false;
+      const chk=()=>{ if(done) return; const v=parseNum(inp.value); if(!isFinite(v)){ toast('Санды жаз'); return; } const good=near(v,a); if(good){ SND.ok(); ok++; inp.className='okk'; r.innerHTML='<span class="good">✔</span>'; } else { left--; SND.bad(); inp.className='nok'; if(left>0){ r.innerHTML='<span class="bad">тағы 1</span>'; inp.select(); return; } r.innerHTML=`<span class="bad">${String(a).replace('-','−')}</span>`; } done=true; dn++; inp.disabled=true; b.disabled=true; res(); };
+      b.onclick=chk; inp.addEventListener('keydown',e=>{ if(e.key==='Enter') chk(); }); c.appendChild(d); }); box.appendChild(c); }); res(); })();
+
+/* 11. ФС: дене қызуы */
+const BO={on:false,t:0}; $('boGo').onclick=()=>{ BO.on=true; BO.t=0; SND.beep(); }; $('boRe').onclick=()=>{ BO.on=false; BO.t=0; };
+LABS.cBody={frame(ctx,w,h,dt){ if(BO.on) BO.t+=dt; const F=BO.on?102.2-(102.2-77)*Math.exp(-BO.t/2):77, eq=BO.on&&102.2-F<.05; ctx.fillStyle='#efe9da'; ctx.fillRect(0,0,w,h);
+  ctx.fillStyle='#22302a'; rr(ctx,40,50,290,120,14); ctx.fill(); label(ctx,fx1(F,1)+' °F',185,128,'#8ff0a4',54,'center',true,'Consolas, monospace'); ctx.fillStyle='#d8dde3'; ctx.fillRect(330,100,70,16);
+  const X=O=>430+O/10*370,Y=q=>190-(q-75)/30*150; ctx.fillStyle='#fff'; ctx.fillRect(430,28,370,162); ctx.strokeStyle='#b8442f'; ctx.lineWidth=3; ctx.beginPath(); const n=Math.min(BO.t,10); for(let q=0;q<=n+.001;q+=.1){ const y=102.2-(102.2-77)*Math.exp(-q/2); q?ctx.lineTo(X(q),Y(y)):ctx.moveTo(X(q),Y(y)); } if(BO.on) ctx.stroke();
+  ctx.setLineDash([5,5]); ctx.strokeStyle='#2e7d4f'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(430,Y(102.2)); ctx.lineTo(800,Y(102.2)); ctx.stroke(); ctx.setLineDash([]); arrow(ctx,430,190,430,16,'#1d2430',2,9); arrow(ctx,430,190,812,190,'#1d2430',2,9); label(ctx,'уақыт',800,208,'#1d2430',13,'right',true); label(ctx,'t, °F',436,24,'#1d2430',13,'left',true);
+  label(ctx,!BO.on?'Термометр әлі қойылмады':eq?'✔ Тепе-теңдік орнады, енді оқуға болады':'Күте тұр: термометр денемен тепе-теңдікке келіп жатыр',185,200,eq?'#2e7d4f':'#b8442f',14,'center',true); }};
+[{q:'Термометр 102,2 °F көрсетті. Цельсиймен қанша?',pre:'t = ',a:39,unit:'°C',hint:'(t°F − 32) / 1,8',sol:'t = (102,2 − 32) / 1,8 = 70,2 / 1,8 = 39 °C'},
+ {q:'Бұл кельвинмен қанша?',pre:'T = ',a:312,unit:'К',hint:'T = t + 273',sol:'T = 39 + 273 = 312 К'},
+ {q:'Термометрді неге бірден алуға болмайды?',ch:['Жылулық тепе-теңдік орнауға уақыт керек','Батарея қызуы керек','Дене қызуы өзгеріп тұрады'],a:0,sol:'Термометр дененің температурасын тепе-теңдік орнағанда ғана көрсетеді.'},
+ {q:'Дәрігердің кеңесі бойынша Арман не істеуі керек?',ch:['Дәріні беріп, қызуды бақылайды','Ештеңе істемейді, қызу қалыпты','Дәрі бермей, қызудың көтерілгенін күтеді'],a:0,sol:'39 °C > 38,5 °C, бірақ 39 °C-тан аспады. Қалыпты дене қызуы шамамен 36,6 °C (97,9 °F).'}].forEach((o,i)=>mkQ($('qBody'),o,i));
+
+/* 12. ФС: тепловизор */
+const HO={p:'win',x:400,y:130}; const HOP={win:[300,150,8,'Терезе'],door:[470,178,5,'Есік'],wall:[380,180,-2,'Қабырға'],roof:[300,62,-6,'Шатыр']};
+document.querySelectorAll('#hoB [data-p]').forEach(b=>b.onclick=()=>{ HO.p=b.dataset.p; document.querySelectorAll('#hoB [data-p]').forEach(x=>x.classList.toggle('on',x===b)); SND.clink(); });
+LABS.cHouse={frame(ctx,w,h,dt){ const hc=t=>`rgb(${mixc([40,60,170],[235,70,40],Math.max(0,Math.min(1,(t+10)/18)))})`; ctx.fillStyle='#14224f'; ctx.fillRect(0,0,w,h); ctx.fillStyle='#1b2c63'; ctx.fillRect(0,225,w,25);
+  ctx.fillStyle=hc(-6); ctx.beginPath(); ctx.moveTo(140,100); ctx.lineTo(340,24); ctx.lineTo(540,100); ctx.closePath(); ctx.fill(); ctx.fillStyle=hc(-2); ctx.fillRect(170,100,340,125);
+  const glow=(x,y,W,H,t)=>{ const g=ctx.createRadialGradient(x+W/2,y+H/2,5,x+W/2,y+H/2,W); g.addColorStop(0,hc(t)); g.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=g; ctx.fillRect(x-30,y-30,W+60,H+60); ctx.fillStyle=hc(t); ctx.fillRect(x,y,W,H); };
+  glow(200,125,70,55,8); glow(300,125,70,55,8); glow(420,140,60,85,5);
+  const T=HOP[HO.p]; HO.x+=(T[0]-HO.x)*Math.min(1,dt*5); HO.y+=(T[1]-HO.y)*Math.min(1,dt*5); ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(HO.x,HO.y,14,0,7); ctx.moveTo(HO.x-22,HO.y); ctx.lineTo(HO.x+22,HO.y); ctx.moveTo(HO.x,HO.y-22); ctx.lineTo(HO.x,HO.y+22); ctx.stroke();
+  ctx.fillStyle='#22302a'; rr(ctx,590,40,220,110,10); ctx.fill(); label(ctx,T[3],700,70,'#f6d77a',19,'center',true); label(ctx,(T[2]+' °C').replace('-','−'),700,122,'#8ff0a4',40,'center',true,'Consolas, monospace'); label(ctx,'Сыртқы ауа: −10 °C',700,180,'#dfe7e2',16,'center',true);
+  for(let i=0;i<=18;i++){ ctx.fillStyle=hc(i-10); ctx.fillRect(40,220-i*10,14,10); } label(ctx,'+8',60,50,'#dfe7e2',13,'left'); label(ctx,'−10',60,228,'#dfe7e2',13,'left'); }};
+[{q:'Үйдің қай жерінен жылу ең көп кетеді?',ch:['Терезе','Қабырға','Шатыр'],a:0,sol:'Терезенің сыртқы беті ең жылы (+8 °C), демек жылу осы жерден көбірек кетеді.'},
+ {q:'Терезе беті мен сырт ауа температурасының айырмасы неше кельвин?',pre:'ΔT = ',a:18,unit:'К',hint:'Температура айырмасы °C пен К-де бірдей',sol:'8 − (−10) = 18 °C = 18 К'},
+ {q:'−10 °C кельвинмен қанша?',pre:'T = ',a:263,unit:'К',hint:'T = t + 273',sol:'T = −10 + 273 = 263 К'},
+ {q:'Шебер неге сұйықтық термометрін емес, пирометрді пайдаланды?',ch:['Бетке тиіспей, қашықтан тез өлшейді','Сұйықтық термометрі аязда жоқ болады','Пирометр жылу береді'],a:0,sol:'Биікте тұрған шатыр мен терезені қашықтан тез өлшеуге болады.'}].forEach((o,i)=>mkQ($('qHouse'),o,i));
+
+/* 13. ФС: шәй */
+const TE={k:0,on:false}; $('teM').oninput=()=>{ TE.on=false; TE.k=0; $('teMv').textContent=$('teM').value+' г'; }; $('teM').oninput(); $('teGo').onclick=()=>{ TE.on=true; TE.k=0; SND.beep(); }; $('teRe').onclick=()=>{ TE.on=false; TE.k=0; };
+LABS.cTea={frame(ctx,w,h,dt){ if(TE.on) TE.k=Math.min(1,TE.k+dt/2); const m=+$('teM').value, tf=(200*90+m*30)/(200+m), t=90+(tf-90)*TE.k, kc=(t-30)/60; ctx.fillStyle='#efe9da'; ctx.fillRect(0,0,w,h);
+  const lvl=60+(100*m/300)*TE.k, X=250,B=185,W=170; ctx.fillStyle=`rgba(${mixc([200,150,70],[150,70,20],kc)},.85)`; ctx.fillRect(X,B-lvl,W,lvl); ctx.strokeStyle='#5d6670'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(X,B-160); ctx.lineTo(X,B); ctx.lineTo(X+W,B); ctx.lineTo(X+W,B-160); ctx.stroke(); ctx.beginPath(); ctx.arc(X+W+18,B-80,30,-1.2,1.2); ctx.stroke();
+  if(TE.on&&TE.k<1&&m>0){ ctx.fillStyle='rgba(120,180,240,.8)'; ctx.fillRect(X+60,20,12,B-lvl-20); ctx.save(); ctx.translate(70,10); ctx.fillStyle='#8d939a'; rr(ctx,40,5,120,64,12); ctx.fill(); ctx.fillRect(160,20,92,8); ctx.restore(); label(ctx,'30 °C су',130,100,'#1f5fa8',16,'center',true); }
+  for(let i=0;i<3;i++){ const f=(TT*.4+i/3)%1; ctx.strokeStyle=`rgba(120,120,120,${(1-f)*(kc*.7)})`; ctx.lineWidth=3; ctx.beginPath(); const x=X+50+i*36,y=B-lvl-f*50; ctx.moveTo(x,y); ctx.quadraticCurveTo(x+10,y-10,x,y-22); ctx.stroke(); }
+  thermo(ctx,500,30,160,kc*.8+.1); label(ctx,fx1(t,1)+' °C',640,92,t>62?COLH:'#2e7d4f',44,'center',true,'Georgia, serif'); label(ctx,TE.k>=1?(Math.abs(tf-60)<.5?'✔ Ішуге қолайлы':tf>60?'Әлі ыстық':'Салқындап кетті'):`200 г шәй + ${m} г су`,640,134,'#1d2430',18,'center',true); }};
+[{q:'200 г 90 °C шәйге 100 г 30 °C су қосылды. Соңғы температура?',pre:'t = ',a:70,unit:'°C',hint:'t = (m₁t₁ + m₂t₂)/(m₁ + m₂)',sol:'t = (200·90 + 100·30) / 300 = 21 000 / 300 = 70 °C'},
+ {q:'Шәй 60 °C болуы үшін 30 °C судан қанша қосу керек?',pre:'m = ',a:200,unit:'г',hint:'(200·90 + m·30) / (200 + m) = 60',sol:'18 000 + 30m = 12 000 + 60m ⇒ m = 200 г. Зертханада тексер!'},
+ {q:'Шынайы кеседегі шәйдің температурасы есептегеннен қандай болады?',ch:['Төмен: жылу кесеге және ауаға да кетеді','Жоғары: кесе шәйді қыздырады','Дәл сондай'],a:0,sol:'Жүйе шынында тұйық емес, сондықтан шығын бар.'},
+ {q:'Шәй 90 °C-тан 70 °C-қа суыды. ΔT неше кельвин?',pre:'ΔT = ',a:20,unit:'К',hint:'1 °C айырма = 1 К айырма',sol:'ΔT = 90 − 70 = 20 К'}].forEach((o,i)=>mkQ($('qTea'),o,i));
+
+document.querySelectorAll('#lvTabs [data-v]').forEach(b=>b.onclick=()=>{ document.querySelectorAll('#lvTabs [data-v]').forEach(x=>x.classList.toggle('on',x===b)); document.querySelectorAll('.lvp').forEach(p=>p.style.display=p.dataset.p===b.dataset.v?'':'none'); fitSlide(slides[cur]); });
+exmBind();
+/* ---------- жақындату: алыстағы партаға тапсырманы үлкейтіп көрсету ---------- */
+const ZSEL='.qk,.tq,.exm,.bq,.aop,.rule,.fbox,canvas.lab,.card,.tip,.warn';
+const ZM={pick:false,el:null,ph:null};
+function zoomPick(on){ ZM.pick=on; $('stage').classList.toggle('zpick',on); $('zm').classList.toggle('on',on); if(on) toast('Үлкейтетін тапсырманы немесе суретті басыңыз'); }
+function zoomClose(){ if(ZM.el){ ZM.ph.replaceWith(ZM.el); ZM.el=null; ZM.ph=null; } $('zov').classList.remove('on'); }
+function zoomOpen(el){ zoomClose(); const w=el.offsetWidth, h=el.offsetHeight, ph=document.createElement('div'); ph.style.cssText=`width:${w}px;height:${h}px;flex:none`;
+  el.replaceWith(ph); ZM.el=el; ZM.ph=ph; const wr=$('zWrap'); wr.style.width=(w+28)+'px'; wr.appendChild(el);
+  $('zov').classList.add('on'); zoomFit(); zoomPick(false); SND.page(); }
+function zoomFit(){ const wr=$('zWrap'); if(!ZM.el) return; const s=Math.max(1,Math.min(1480/wr.offsetWidth,790/wr.offsetHeight,2.8)); wr.style.transform=`scale(${s})`; }
+if(window.ResizeObserver) new ResizeObserver(zoomFit).observe($('zWrap'));
+function zoomTarget(e){ if(!ZM.pick||e.target.closest('#zm,.bottom,.rightw')) return null; const el=e.target.closest(ZSEL); return el&&slides[cur].contains(el)?el:null; }
+document.addEventListener('pointerdown',e=>{ if(zoomTarget(e)){ e.stopPropagation(); e.preventDefault(); } },true);
+document.addEventListener('click',e=>{ const el=zoomTarget(e); if(el){ e.stopPropagation(); e.preventDefault(); zoomOpen(el); } },true);
+$('zm').onclick=()=>{ if(ZM.el){ zoomClose(); return; } zoomPick(!ZM.pick); };
+$('zx').onclick=zoomClose; $('zov').addEventListener('click',e=>{ if(e.target===$('zov')) zoomClose(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ zoomClose(); zoomPick(false); return; }
+  if(/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) return; if('zZяЯ'.includes(e.key)) $('zm').onclick(); });
+
+/* 16–17. Жеке жұмыс және бағалау */
+const TQ={A1:[300,1],A2:[127,1],A3:[50,1],A4:[35,1],B1:[25,2],B2:[4.14,2],B3:[50,2],B4:[35,2],C1:[500,2],C2:[227,2],C3:[-40,2],C4:[233,2]};
+const MAXP=20;
+let ROSTER=store.get('tm_roster',store.get('tm_roster',null)); if(!ROSTER){ ROSTER=[]; for(let i=1;i<=19;i++) ROSTER.push(i+'-оқушы'); }
+let RES=store.get('tm_res',{}), who=0;
+const pts=n=>Object.values(RES[n]||{}).reduce((a,r)=>a+(r.p||0),0);
+const mark=p=>p>=18?5:p>=14?4:p>=9?3:2;
+function tkFill(){ const sel=$('tkWho'); sel.innerHTML=ROSTER.map((n,i)=>`<option value="${i}">${i+1}. ${n}</option>`).join(''); if(who>=ROSTER.length) who=0; sel.value=who; tkLoad(); }
+function tkLoad(){ const r=RES[ROSTER[who]]||{};
+  document.querySelectorAll('[data-q]').forEach(inp=>{ const q=inp.dataset.q, s=r[q], out=inp.parentElement.querySelector('.r');
+    inp.value=s?s.v:''; inp.className=s&&s.done?(s.p>0?'okk':'nok'):''; inp.disabled=!!(s&&s.done);
+    out.innerHTML=!s?'':s.done?(s.p>0?`<span class="good">✔ +${nf(s.p,1)}</span>`:`<span class="bad">✘ ${nf(TQ[q][0],5)}</span>`):'<span class="bad">✘ тағы 1 мүмкіндік</span>'; });
+  $('tkScore').textContent=nf(pts(ROSTER[who]),1)+' / '+MAXP+' балл'; }
+function tkCheck(inp){ const q=inp.dataset.q, n=ROSTER[who]; if(!n) return; const v=parseNum(inp.value); if(!isFinite(v)){ toast('Санды жаз'); return; }
+  const r=RES[n]=RES[n]||{}; const s=r[q]=r[q]||{t:0,p:0,v:'',done:false}; if(s.done) return;
+  s.t++; s.v=inp.value; if(near(v,TQ[q][0])){ s.p=s.t===1?TQ[q][1]:TQ[q][1]/2; s.done=true; SND.ok(); } else { SND.bad(); if(s.t>=2){ s.done=true; s.p=0; } }
+  store.set('tm_res',RES); tkLoad(); grBuild(); }
+document.querySelectorAll('[data-q]').forEach(inp=>{ inp.addEventListener('keydown',e=>{ if(e.key==='Enter'){ tkCheck(inp); e.preventDefault(); } });
+  const b=document.createElement('button'); b.className='btn'; b.style.cssText='padding:3px 9px;font-size:14px'; b.textContent='✓'; b.title='Тексеру'; b.onclick=()=>tkCheck(inp); inp.after(b); });
+$('tkWho').onchange=()=>{ who=+$('tkWho').value; tkLoad(); };
+$('tkPrev').onclick=()=>{ who=(who-1+ROSTER.length)%ROSTER.length; $('tkWho').value=who; tkLoad(); };
+$('tkNext').onclick=()=>{ who=(who+1)%ROSTER.length; $('tkWho').value=who; tkLoad(); };
+function grBuild(){ let h='<tr><th>№</th><th>Аты-жөні</th><th>A (4)</th><th>B (8)</th><th>C (8)</th><th>Барлығы</th><th>Баға</th></tr>', c=[0,0,0,0];
+  ROSTER.forEach((n,i)=>{ const r=RES[n]||{}, sum=k=>Object.entries(r).filter(([q])=>q[0]===k).reduce((a,[,s])=>a+(s.p||0),0), p=pts(n), any=Object.keys(r).length;
+    if(any) c[5-mark(p)]++;
+    h+=`<tr><td>${i+1}</td><td class="l">${n}</td><td>${any?nf(sum('A'),1):''}</td><td>${any?nf(sum('B'),1):''}</td><td>${any?nf(sum('C'),1):''}</td><td><b>${any?nf(p,1):''}</b></td><td><b>${any?'«'+mark(p)+'»':''}</b></td></tr>`; });
+  $('grTab').innerHTML=h; $('g1').textContent=c[0]; $('g2').textContent=c[1]; $('g3').textContent=c[2]; $('g4').textContent=c[3]; }
+$('roster').value=ROSTER.join('\n');
+$('rsSave').onclick=()=>{ const l=$('roster').value.split('\n').map(s=>s.trim()).filter(Boolean); if(!l.length){ toast('Тізім бос'); return; } ROSTER=l; store.set('tm_roster',ROSTER); tkFill(); grBuild(); toast('Тізім сақталды: '+l.length+' оқушы'); };
+$('grClr').onclick=()=>{ if(!confirm('Барлық оқушының нәтижесі өшеді. Жалғастырамыз ба?')) return; RES={}; store.set('tm_res',RES); tkLoad(); grBuild(); };
+tkFill(); grBuild();
+/* ---------- тақта ---------- */
+const board=(()=>{ const cv=$('ink'), ctx=cv.getContext('2d'); let ink=store.get('tm_ink',{}), color='#f2efe2', width=3.6, eraser=false, curS=null, saveT;
+  const list=()=> (ink[cur]=ink[cur]||[]);
+  function resize(){ const r=cv.getBoundingClientRect(); if(!r.width) return; const k=window.devicePixelRatio||1; cv.width=Math.round(r.width*k); cv.height=Math.round(r.height*k); redraw(); }
+  function seg(s,i){ const W=cv.width,H=cv.height,p=s.p,base=s.w*W/600; ctx.globalCompositeOperation=s.e?'destination-out':'source-over'; ctx.strokeStyle=s.c; ctx.lineCap='round'; ctx.lineJoin='round';
+    if(i===0){ ctx.lineWidth=base*(.6+p[0][2]*.8); ctx.beginPath(); ctx.moveTo(p[0][0]*W,p[0][1]*H); ctx.lineTo(p[0][0]*W+.1,p[0][1]*H); ctx.stroke(); return; }
+    const a=p[i-1],b=p[i],z=p[i-2]||a; ctx.lineWidth=base*(.6+b[2]*.8); ctx.beginPath(); ctx.moveTo((z[0]+a[0])/2*W,(z[1]+a[1])/2*H); ctx.quadraticCurveTo(a[0]*W,a[1]*H,(a[0]+b[0])/2*W,(a[1]+b[1])/2*H); ctx.stroke(); }
+  function redraw(){ ctx.globalCompositeOperation='source-over'; ctx.clearRect(0,0,cv.width,cv.height); for(const s of list()) for(let i=0;i<s.p.length;i++) seg(s,i); ctx.globalCompositeOperation='source-over'; }
+  function save(){ clearTimeout(saveT); saveT=setTimeout(()=>store.set('tm_ink',ink),400); }
+  function pt(e){ const r=cv.getBoundingClientRect(); return [(e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height,e.pointerType==='pen'?(e.pressure||.5):.5]; }
+  cv.addEventListener('pointerdown',e=>{ if(e.button>0&&e.pointerType==='mouse') return; cv.setPointerCapture(e.pointerId); curS={c:color,w:eraser?width*5:width,e:eraser,p:[pt(e)]}; list().push(curS); seg(curS,0); e.preventDefault(); });
+  cv.addEventListener('pointermove',e=>{ if(!curS) return; const evs=e.getCoalescedEvents?e.getCoalescedEvents():[e]; for(const ev of evs){ curS.p.push(pt(ev)); seg(curS,curS.p.length-1); } });
+  const end=()=>{ if(curS){ curS=null; ctx.globalCompositeOperation='source-over'; save(); } };
+  cv.addEventListener('pointerup',end); cv.addEventListener('pointercancel',end); cv.addEventListener('lostpointercapture',end);
+  document.querySelectorAll('.sw').forEach(b=>b.onclick=()=>{ color=b.dataset.c; eraser=false; $('erase').classList.remove('on'); document.querySelectorAll('.sw').forEach(x=>x.classList.toggle('on',x===b)); });
+  document.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{ width=+b.dataset.w; document.querySelectorAll('[data-w]').forEach(x=>x.classList.toggle('on',x===b)); });
+  $('erase').onclick=()=>{ eraser=!eraser; $('erase').classList.toggle('on',eraser); };
+  function undo(){ list().pop(); redraw(); save(); } $('undo').onclick=undo;
+  $('wipe').onclick=()=>{ if(!list().length) return; ink[cur]=[]; redraw(); save(); toast('Осы беттегі жазба тазаланды'); };
+  return {resize,redraw,undo}; })();
+
+/* ---------- слайдты сыйғызу (тақта ашық/жабық) ---------- */
+const slides=[...document.querySelectorAll('.slide')]; let cur=0;
+slides.forEach(s=>{ if(s.classList.contains('nofit')) return; const sc=document.createElement('div'); sc.className='sc'; while(s.firstChild) sc.appendChild(s.firstChild); s.appendChild(sc); });
+function fitSlide(s){ if(!s||s.classList.contains('nofit')) return; const sc=s.querySelector('.sc'), L=$('slides');
+  const AW=L.clientWidth-48, AH=L.clientHeight-26; if(AW<=0) return; let best={k:0,w:900};
+  sc.style.transform='none';
+  for(let w=880; w<=Math.max(880,Math.min(1500,AW)); w+=40){ sc.style.width=w+'px'; const h=sc.offsetHeight; const k=Math.min(AW/w,AH/h,1.75); if(k>best.k+.004) best={k,w}; }
+  sc.style.width=best.w+'px'; sc.style.left=(24+(AW-best.w*best.k)/2)+'px'; sc.style.transform=`scale(${best.k})`; }
+let NB=store.get('tm_noboard',false);
+function setBoard(hidden){ NB=hidden; store.set('tm_noboard',NB); $('stage').classList.toggle('noboard',NB); $('rightw').style.transform=''; fitSlide(slides[cur]); setTimeout(()=>{ fitSlide(slides[cur]); board.resize(); },380); }
+$('hideB').onclick=()=>setBoard(true);
+(()=>{ // тақтаны қолмен оңға ысыру → жасырылады; оң жақтағы «ТАҚТА» белгісін басу → қайта шығады
+  const g=$('grip'), rw=$('rightw'); let x0=null;
+  const k=()=>$('stage').getBoundingClientRect().width/1600;
+  g.addEventListener('pointerdown',e=>{ x0=e.clientX; g.setPointerCapture(e.pointerId); rw.classList.add('drag'); e.preventDefault(); });
+  g.addEventListener('pointermove',e=>{ if(x0===null) return; const dx=Math.max(0,(e.clientX-x0)/k()); rw.style.transform=`translateX(${dx}px)`; });
+  const up=e=>{ if(x0===null) return; const dx=(e.clientX-x0)/k(); x0=null; rw.classList.remove('drag'); if(dx>110) setBoard(true); else rw.style.transform=''; };
+  g.addEventListener('pointerup',up); g.addEventListener('pointercancel',up);
+  $('btab').addEventListener('pointerdown',e=>{ e.preventDefault(); setBoard(false); });
+})();
+
+/* ---------- навигация ---------- */
+slides.forEach((s,i)=>{ const b=document.createElement('button'); b.className='dot'+(s.dataset.wide?' gm':''); b.textContent=i+1; b.title=s.dataset.title; b.onclick=()=>go(i); $('dots').appendChild(b); });
+function go(i){ zoomClose(); zoomPick(false); i=Math.max(0,Math.min(slides.length-1,i)); if(i!==cur) SND.page(); slides[cur].classList.remove('on'); cur=i; const s=slides[cur]; s.classList.add('on');
+  $('stitle').textContent=s.dataset.title; $('bhint').textContent=s.dataset.hint||''; $('stage').classList.toggle('wide',!!s.dataset.wide);
+  [...$('dots').children].forEach((d,j)=>d.classList.toggle('on',j===cur)); $('cnt').textContent=(cur+1)+' / '+slides.length;
+  $('prev').disabled=cur===0; $('next').disabled=cur===slides.length-1; store.set('tm_slide',cur); fitSlide(s); requestAnimationFrame(()=>{ board.resize(); fitSlide(s); }); }
+$('prev').onclick=()=>go(cur-1); $('next').onclick=()=>go(cur+1);
+document.addEventListener('keydown',e=>{ const typing=/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName);
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'&&!typing){ board.undo(); e.preventDefault(); return; } if(typing) return;
+  if(['ArrowRight','PageDown'].includes(e.key)){ go(cur+1); e.preventDefault(); } else if(['ArrowLeft','PageUp'].includes(e.key)){ go(cur-1); e.preventDefault(); }
+  else if('fFаА'.includes(e.key)) toggleFS(); else if('tTеЕ'.includes(e.key)) setBoard(!NB); });
+document.addEventListener('fullscreenchange',()=>{ $('fs').textContent=document.fullscreenElement?'✕ Толық экраннан шығу':'⛶ Толық экран'; });
+function toggleFS(){ try{ if(!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }catch(e){} }
+$('fs').onclick=toggleFS; $('snd').onclick=()=>{ $('snd').textContent=SND.toggle()?'🔊':'🔇'; }; $('snd').textContent=SND.on?'🔊':'🔇';
+function fit(){ const s=Math.min(innerWidth/1600,innerHeight/900); $('stage').style.transform=`translate(${(innerWidth-1600*s)/2}px,${(innerHeight-900*s)/2}px) scale(${s})`; board.resize(); }
+addEventListener('resize',fit); $('slides').classList.add('notrans'); $('stage').classList.toggle('noboard',NB); fit(); setTimeout(()=>$('slides').classList.remove('notrans'),200);
+$('slides').addEventListener('transitionend',e=>{ if(e.target===$('slides')){ fitSlide(slides[cur]); board.resize(); } });
+const hashN=/^#(\d+)$/.exec(location.hash); go(hashN?(+hashN[1]-1):Math.min(store.get('tm_slide',0),slides.length-1));
+addEventListener('hashchange',()=>{ const m=/^#(\d+)$/.exec(location.hash); if(m) go(+m[1]-1); });
+if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>fitSlide(slides[cur]));
+let prevT=performance.now();
+(function loop(now){ const dt=Math.min(.05,Math.max(0,(now-prevT)/1000)); prevT=now; TT+=dt;
+  [...slides[cur].querySelectorAll('canvas.lab'),...$('zWrap').querySelectorAll('canvas.lab')].forEach(cv=>{ const L=LABS[cv.id]; if(L) L.frame(cv.getContext('2d'),cv.width,cv.height,dt); });
+  requestAnimationFrame(loop); })(prevT);
+</script>
+<script src="phone_panel.js"></script>
+</body>
+</html>
